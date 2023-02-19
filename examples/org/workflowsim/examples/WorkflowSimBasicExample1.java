@@ -111,7 +111,7 @@ public class WorkflowSimBasicExample1 {
              */
             Parameters.SchedulingAlgorithm sch_method = Parameters.SchedulingAlgorithm.MINMIN;
             Parameters.PlanningAlgorithm pln_method = Parameters.PlanningAlgorithm.INVALID;
-            ReplicaCatalog.FileSystem file_system = ReplicaCatalog.FileSystem.SHARED;
+            ReplicaCatalog.FileSystem file_system = ReplicaCatalog.FileSystem.LOCAL;
 
             /**
              * No overheads

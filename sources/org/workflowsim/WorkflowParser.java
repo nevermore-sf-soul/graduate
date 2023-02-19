@@ -45,6 +45,12 @@ public final class WorkflowParser {
      * The path to DAX file.
      */
     private final String daxPath;
+
+    public String getDaxPath() {
+        return daxPath;
+    }
+
+
     /**
      * The path to DAX files.
      */
@@ -102,6 +108,12 @@ public final class WorkflowParser {
         setTaskList(new ArrayList<>());
     }
 
+    public WorkflowParser(String daxPath) {
+        this.mName2Task = new HashMap<>();
+        this.daxPath = daxPath;
+        this.jobIdStartsFrom = 1;
+        setTaskList(new ArrayList<>());
+    }
     /**
      * Start to parse a workflow which is a xml file(s).
      */
@@ -153,18 +165,17 @@ public final class WorkflowParser {
                          * is 0.1. Otherwise CloudSim would ignore this task.
                          * BUG/#11
                          */
-                        double runtime;
-                        if (node.getAttributeValue("runtime") != null) {
-                            String nodeTime = node.getAttributeValue("runtime");
-                            runtime = 1000 * Double.parseDouble(nodeTime);
-                            if (runtime < 100) {
-                                runtime = 100;
-                            }
-                            length = (long) runtime;
-                        } else {
-                            Log.printLine("Cannot find runtime for " + nodeName + ",set it to be 0");
-                        }   //multiple the scale, by default it is 1.0
-                        length *= Parameters.getRuntimeScale();
+//                        double runtime;
+//                        if (node.getAttributeValue("runtime") != null) {
+//                            String nodeTime = node.getAttributeValue("runtime");
+//                            runtime = 1000 * Double.parseDouble(nodeTime);
+//                            if (runtime < 100) {
+//                                runtime = 100;
+//                            }
+//                        } else {
+//                            Log.printLine("Cannot find runtime for " + nodeName + ",set it to be 0");
+//                        }   //multiple the scale, by default it is 1.0
+
 
                         /**
                          * get the task privacy level
@@ -178,6 +189,12 @@ public final class WorkflowParser {
                             Log.printLine("Cannot find privacylevel for " + nodeName + ",set it to be 0");
                         }   //multiple the scale, by default it is 1.0
 
+                        if (node.getAttributeValue("ordernums") != null) {
+                            String nodepl = node.getAttributeValue("ordernums");
+                            length = Long.parseLong(nodepl);
+                        } else {
+                            Log.printLine("Cannot find ordernums for " + nodeName + ",set it to be 0");
+                        }   //multiple the scale, by default it is 1.0
 
 
                         List<Element> fileList = node.getChildren();

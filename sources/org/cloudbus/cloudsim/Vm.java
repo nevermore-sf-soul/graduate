@@ -327,6 +327,16 @@ public class Vm {
 		return numberOfPes;
 	}
 
+	@Override
+	public String toString() {
+		return "Vm{" +
+				"userId=" + userId +
+				", mips=" + mips +
+				", numberOfPes=" + numberOfPes +
+				", vmm='" + vmm + '\'' +
+				'}';
+	}
+
 	/**
 	 * Sets the number of pes.
 	 * 

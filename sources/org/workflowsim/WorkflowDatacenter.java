@@ -17,6 +17,9 @@ package org.workflowsim;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.cloudbus.cloudsim.Cloudlet;
 import org.cloudbus.cloudsim.CloudletScheduler;
 import org.cloudbus.cloudsim.Consts;
@@ -259,28 +262,34 @@ public class WorkflowDatacenter extends Datacenter {
 
                         boolean requiredFileStagein = true;
                         for (Iterator it = siteList.iterator(); it.hasNext();) {
-                            //site is where one replica of this data is located at
                             String site = (String) it.next();
-                            if (site.equals(this.getName())) {
-                                continue;
-                            }
                             /**
                              * This file is already in the local vm and thus it
                              * is no need to transfer
                              */
                             if (site.equals(Integer.toString(vmId))) {
-                                requiredFileStagein = false;
-                                break;
+                            requiredFileStagein = false;
+                            break;
                             }
+                            //site is where one replica of this data is located at
                             double bwth;
-                            if (site.equals(Parameters.SOURCE)) {
+                            if (site.equals(this.getName())) {
+                                ClusterStorage cs=(ClusterStorage) this.getStorageList().get(0);
+                                bwth=cs.bandwidthMap.get("local");
+                            }
+                            else if (site.equals("source")) {
                                 //transfers from the source to the VM is limited to the VM bw only
-                                bwth = vm.getBw();
+//                                bwth = vm.getBw();
+                                ClusterStorage cs=(ClusterStorage) this.getStorageList().get(0);
+                                bwth=cs.bandwidthMap.get("source");
                                 //bwth = dcStorage.getBaseBandwidth();
                             } else {
                                 //transfers between two VMs is limited to both VMs
-                                bwth = Math.min(vm.getBw(), getVmAllocationPolicy().getHost(Integer.parseInt(site), userId).getVm(Integer.parseInt(site), userId).getBw());
-                                //bwth = dcStorage.getBandwidth(Integer.parseInt(site), vmId);
+//                                bwth = Math.min(vm.getBw(), getVmAllocationPolicy().getHost(Integer.parseInt(site), userId).getVm(Integer.parseInt(site), userId).getBw());
+                                ClusterStorage cs=(ClusterStorage) this.getStorageList().get(0);
+                                bwth=cs.bandwidthMap.get(site);
+//                                bwth = dcStorage.getBandwidth(Integer.parseInt(site), vmId);
+
                             }
                             if (bwth > maxBwth) {
                                 maxBwth = bwth;
@@ -297,7 +306,7 @@ public class WorkflowDatacenter extends Datacenter {
                         //We should add but since CondorVm has a small capability it often fails
                         //We currently don't use this storage to do anything meaningful. It is left for future. 
                         //condorVm.addLocalFile(file);
-                        ReplicaCatalog.addFileToStorage(file.getName(), Integer.toString(vmId));
+                        ReplicaCatalog.addFileToStorage(file.getName(), this.getName());
                         break;
                 }
             }
@@ -382,7 +391,7 @@ public class WorkflowDatacenter extends Datacenter {
                          * Left here for future work
                          */
                         CondorVM vm = (CondorVM) host.getVm(vmId, userId);
-                        ReplicaCatalog.addFileToStorage(file.getName(), Integer.toString(vmId));
+                        ReplicaCatalog.addFileToStorage(file.getName(), this.getName());
                         break;
                 }
             }

@@ -63,8 +63,8 @@ public class WorkflowSimMultipleClusterExample1 extends WorkflowSimBasicExample1
         LinkedList<CondorVM> list = new LinkedList<>();
 
         //VM Parameters
-        long size = 10000; //image size (MB)
-        int ram = 512; //vm memory (MB)
+        long size = 0; //image size (MB)
+        int ram = 0; //vm memory (MB)
         int mips = 1000;
         long bw = 1000;
         int pesNumber = 1; //number of cpus
@@ -94,7 +94,7 @@ public class WorkflowSimMultipleClusterExample1 extends WorkflowSimBasicExample1
              * the data center or the host doesn't have sufficient resources the
              * exact vmNum would be smaller than that. Take care.
              */
-            int vmNum = 20;//number of vms;
+            int vmNum = 4;//number of vms;
             /**
              * Should change this based on real physical path
              */
@@ -110,8 +110,8 @@ public class WorkflowSimMultipleClusterExample1 extends WorkflowSimBasicExample1
              * algorithm should be INVALID such that the planner would not
              * override the result of the scheduler
              */
-            Parameters.SchedulingAlgorithm sch_method = Parameters.SchedulingAlgorithm.MINMIN;
-            Parameters.PlanningAlgorithm pln_method = Parameters.PlanningAlgorithm.INVALID;
+            Parameters.SchedulingAlgorithm sch_method = Parameters.SchedulingAlgorithm.STATIC;
+            Parameters.PlanningAlgorithm pln_method = Parameters.PlanningAlgorithm.HEFT;
             ReplicaCatalog.FileSystem file_system = ReplicaCatalog.FileSystem.SHARED;
 
             /**
@@ -202,16 +202,16 @@ public class WorkflowSimMultipleClusterExample1 extends WorkflowSimBasicExample1
         // very big so that the broker will distribute them. 
         // In a future work, vm scheduling algorithms should be done
         //
-        for (int i = 1; i <= 3; i++) {
+        for (int i = 1; i <= 1; i++) {
             List<Pe> peList1 = new ArrayList<>();
-            int mips = 2000;
+            int mips = 1000;
             // 3. Create PEs and add these into the list.
             //for a quad-core machine, a list of 4 PEs is required:
             peList1.add(new Pe(0, new PeProvisionerSimple(mips))); // need to store Pe id and MIPS Rating
             peList1.add(new Pe(1, new PeProvisionerSimple(mips)));
 
             int hostId = 0;
-            int ram = 2048; //host memory (MB)
+            int ram = 0; //host memory (MB)
             long storage = 1000000; //host storage
             int bw = 10000;
             hostList.add(

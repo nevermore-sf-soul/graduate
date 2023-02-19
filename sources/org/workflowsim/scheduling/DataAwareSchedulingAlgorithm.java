@@ -69,6 +69,7 @@ public class DataAwareSchedulingAlgorithm extends BaseSchedulingAlgorithm {
                 getScheduledList().add(cloudlet);
             }
         }
+
     }
 
     /*
@@ -95,7 +96,7 @@ public class DataAwareSchedulingAlgorithm extends BaseSchedulingAlgorithm {
                     }
                 }
                 if(!hasFile){
-                    time += file.getSize() ;
+                    time += file.getSize();
                 }
             }
         }
