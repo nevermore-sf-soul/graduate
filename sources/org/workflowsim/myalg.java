@@ -4,21 +4,33 @@ import org.cloudbus.cloudsim.Datacenter;
 import org.cloudbus.cloudsim.Vm;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class myalg {
    static  List<Datacenter> datacenterList=new ArrayList<>();
     static  List<Vm> VmList=new ArrayList<>();
     long[][] bandwidth;
+    static int vmid;
+    static Map<String,Double> vmprice=new HashMap<>();
     public static void main(String[] args) {
         WorkflowParser workflowParser=new WorkflowParser("F:/WorkflowSim-1.0-master/config/dax/Montage_100.xml");
         workflowParser.parse();
+        vmprice.put("edge1",0.031);
+        vmprice.put("edge2",0.052);
+        vmprice.put("edge4",0.208);
+        vmprice.put("cloud1",0.0255);
+        vmprice.put("cloud2",0.0416);
+        vmprice.put("cloud4",0.1664);
+
         List<Task> list=workflowParser.getTaskList();
         List<Task> orderdtasks=calculatetaskorder(list);
 
     }
 
-    private static List<Task> calculatetaskorder(List<Task> taskList,) {
+    private static List<Task> calculatetaskorder(List<Task> taskList) {
+        return null;
     }
 
     class Datacenter {
@@ -28,7 +40,7 @@ public class myalg {
         private String name;
         private List<Vm> vms;
         private int privacylevel;
-
+        private int useablecores;
         public Datacenter(int cpucores, int mibps, int id, String name, List<Vm> vms, int privacylevel) {
             this.cpucores = cpucores;
             this.mibps = mibps;
@@ -36,6 +48,7 @@ public class myalg {
             this.name = name;
             this.vms = vms;
             this.privacylevel = privacylevel;
+            useablecores=cpucores;
         }
 
         public List<Vm> getVms() {
@@ -92,6 +105,24 @@ public class myalg {
         int id;
         double earlyidletime;
 
+        public double getPrice() {
+            return price;
+        }
+
+        public void setPrice(double price) {
+            this.price = price;
+        }
+
+        public double getTotalprice() {
+            return totalprice;
+        }
+
+        public void setTotalprice(double totalprice) {
+            this.totalprice = totalprice;
+        }
+
+        double price;
+        double totalprice;
         public Vm(int cpucore, int datacenterid, int id, double earlyidletime) {
             this.cpucore = cpucore;
             this.datacenterid = datacenterid;
@@ -131,8 +162,10 @@ public class myalg {
             this.earlyidletime = earlyidletime;
         }
     }
-    public void createvm(int vmcpucores,int datacenterid)
+    public void createvm(int vmcpucores,int datacenterid,double earlidletime)
     {
+        Vm kvm=new Vm(vmcpucores,datacenterid,vmid++,earlidletime);
 
+        VmList.add(kvm);
     }
 }
