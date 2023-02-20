@@ -1,8 +1,5 @@
 package org.workflowsim;
 
-import org.cloudbus.cloudsim.Datacenter;
-import org.cloudbus.cloudsim.Vm;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -15,14 +12,14 @@ public class myalg {
     static int vmid;
     static Map<String,Double> vmprice=new HashMap<>();
     public static void main(String[] args) {
-        WorkflowParser workflowParser=new WorkflowParser("F:/WorkflowSim-1.0-master/config/dax/Montage_100.xml");
+        myparser workflowParser=new myparser("F:/WorkflowSim-1.0-master/config/dax/Montage_100.xml",new myreplicalog());
         workflowParser.parse();
         vmprice.put("edge1",0.031);
         vmprice.put("edge2",0.052);
         vmprice.put("edge4",0.208);
         vmprice.put("cloud1",0.0255);
-        vmprice.put("cloud2",0.0416);
-        vmprice.put("cloud4",0.1664);
+        vmprice.put("cloud2",0.0336);
+        vmprice.put("cloud4",0.1344);
 
         List<Task> list=workflowParser.getTaskList();
         List<Task> orderdtasks=calculatetaskorder(list);

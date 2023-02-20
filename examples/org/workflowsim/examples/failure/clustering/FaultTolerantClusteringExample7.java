@@ -38,7 +38,7 @@ import org.workflowsim.utils.OverheadParameters;
 import org.workflowsim.utils.Parameters;
 import org.workflowsim.utils.PeriodicalDistributionGenerator;
 import org.workflowsim.utils.PeriodicalSignal;
-import org.workflowsim.utils.ReplicaCatalog;
+import org.workflowsim.ReplicaCatalog;
 
 /**
  * This FaultTolerantClusteringExample3 uses Dynamic Reclustering to address the

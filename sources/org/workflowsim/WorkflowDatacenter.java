@@ -17,8 +17,6 @@ package org.workflowsim;
 
 import java.util.Iterator;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.cloudbus.cloudsim.Cloudlet;
 import org.cloudbus.cloudsim.CloudletScheduler;
@@ -33,7 +31,6 @@ import org.cloudbus.cloudsim.VmAllocationPolicy;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.core.CloudSimTags;
 import org.cloudbus.cloudsim.core.SimEvent;
-import org.workflowsim.utils.ReplicaCatalog;
 import org.workflowsim.utils.Parameters;
 import org.workflowsim.utils.Parameters.ClassType;
 import org.workflowsim.utils.Parameters.FileType;

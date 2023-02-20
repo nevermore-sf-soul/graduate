@@ -9,7 +9,7 @@ import org.workflowsim.*;
 import org.workflowsim.utils.ClusteringParameters;
 import org.workflowsim.utils.OverheadParameters;
 import org.workflowsim.utils.Parameters;
-import org.workflowsim.utils.ReplicaCatalog;
+import org.workflowsim.ReplicaCatalog;
 
 import java.io.File;
 import java.text.DecimalFormat;

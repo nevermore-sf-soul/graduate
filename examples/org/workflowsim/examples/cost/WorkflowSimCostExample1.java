@@ -31,7 +31,7 @@ import org.workflowsim.examples.WorkflowSimBasicExample1;
 import org.workflowsim.utils.ClusteringParameters;
 import org.workflowsim.utils.OverheadParameters;
 import org.workflowsim.utils.Parameters;
-import org.workflowsim.utils.ReplicaCatalog;
+import org.workflowsim.ReplicaCatalog;
 
 /**
  * This WorkflowSimCostExample1 is different to WorkflowSimExample1 in that it

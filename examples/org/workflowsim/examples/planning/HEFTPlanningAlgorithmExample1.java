@@ -32,7 +32,7 @@ import org.workflowsim.examples.WorkflowSimBasicExample1;
 import org.workflowsim.utils.ClusteringParameters;
 import org.workflowsim.utils.OverheadParameters;
 import org.workflowsim.utils.Parameters;
-import org.workflowsim.utils.ReplicaCatalog;
+import org.workflowsim.ReplicaCatalog;
 
 /**
  * This DHEFTPlanningAlgorithmExample1 creates a workflow planner, a workflow

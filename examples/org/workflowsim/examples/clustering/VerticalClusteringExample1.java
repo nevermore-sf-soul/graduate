@@ -31,7 +31,7 @@ import org.workflowsim.utils.DistributionGenerator;
 import org.workflowsim.utils.ClusteringParameters;
 import org.workflowsim.utils.OverheadParameters;
 import org.workflowsim.utils.Parameters;
-import org.workflowsim.utils.ReplicaCatalog;
+import org.workflowsim.ReplicaCatalog;
 
 /**
  * This VerticalClusteringExample1 is using vertical clustering. In contrast to

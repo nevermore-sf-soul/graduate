@@ -32,7 +32,7 @@ import org.workflowsim.utils.DistributionGenerator;
 import org.workflowsim.utils.ClusteringParameters;
 import org.workflowsim.utils.OverheadParameters;
 import org.workflowsim.utils.Parameters;
-import org.workflowsim.utils.ReplicaCatalog;
+import org.workflowsim.ReplicaCatalog;
 
 /**
  * This HorizontalClusteringExample1 is using horizontal clustering or more specifically

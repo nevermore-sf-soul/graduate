@@ -21,7 +21,7 @@ import org.workflowsim.CondorVM;
 import org.workflowsim.FileItem;
 import org.workflowsim.Job;
 import org.workflowsim.WorkflowSimTags;
-import org.workflowsim.utils.ReplicaCatalog;
+import org.workflowsim.ReplicaCatalog;
 
 /**
  * Data aware algorithm. Schedule a job to a vm that has most input data it requires. 

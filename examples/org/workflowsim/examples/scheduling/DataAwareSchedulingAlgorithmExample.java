@@ -29,7 +29,7 @@ import org.workflowsim.examples.planning.DHEFTPlanningAlgorithmExample1;
 import org.workflowsim.utils.ClusteringParameters;
 import org.workflowsim.utils.OverheadParameters;
 import org.workflowsim.utils.Parameters;
-import org.workflowsim.utils.ReplicaCatalog;
+import org.workflowsim.ReplicaCatalog;
 
 /**
  * This Data Aware Scheduling Algorithm

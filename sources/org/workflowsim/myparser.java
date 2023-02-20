@@ -1,4 +1,4 @@
-/**
+package org.workflowsim; /**
  * Copyright 2012-2013 University Of Southern California
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
@@ -13,7 +13,6 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.workflowsim;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,7 +26,6 @@ import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
-import org.workflowsim.utils.Parameters;
 import org.workflowsim.utils.Parameters.FileType;
 
 /**
@@ -38,7 +36,7 @@ import org.workflowsim.utils.Parameters.FileType;
  * @date Aug 23, 2013
  * @date Nov 9, 2014
  */
-public final class WorkflowParser {
+public final class myparser {
 
     /**
      * The path to DAX file.
@@ -68,6 +66,7 @@ public final class WorkflowParser {
      */
     private int jobIdStartsFrom;
 
+    private myreplicalog replicaCatalog;
     /**
      * Gets the task list
      *
@@ -91,28 +90,14 @@ public final class WorkflowParser {
      */
     protected Map<String, Task> mName2Task;
 
-    /**
-     * Initialize a WorkflowParser
-     *
-     * @param userId the user id. Currently we have just checked single user
-     * mode
-     */
-    public WorkflowParser(int userId) {
-        this.userId = userId;
-        this.mName2Task = new HashMap<>();
-        this.daxPath = Parameters.getDaxPath();
-        this.daxPaths = Parameters.getDAXPaths();
-        this.jobIdStartsFrom = 1;
 
-        setTaskList(new ArrayList<>());
-    }
-
-    public WorkflowParser(String daxPath) {
+    public myparser(String daxPath,myreplicalog replicaCatalog) {
         this.mName2Task = new HashMap<>();
         this.daxPath = daxPath;
         this.jobIdStartsFrom = 1;
         setTaskList(new ArrayList<>());
         this.daxPaths=null;this.userId=0;
+        this.replicaCatalog=replicaCatalog;
     }
     /**
      * Start to parse a workflow which is a xml file(s).
@@ -214,7 +199,7 @@ public final class WorkflowParser {
 
                                 String fileSize = file.getAttributeValue("size");
                                 if (fileSize != null) {
-                                    size = Double.parseDouble(fileSize) /*/ 1024*/;
+                                    size = Double.parseDouble(fileSize) / 1024;
                                 } else {
                                     Log.printLine("File Size not found for " + fileName);
                                 }
@@ -261,12 +246,12 @@ public final class WorkflowParser {
                                      * whether a size is zero
                                      */
                                     tFile = new FileItem(fileName, size);
-                                } else if (ReplicaCatalog.containsFile(fileName)) {
-                                    tFile = ReplicaCatalog.getFile(fileName);
+                                } else if (replicaCatalog.containsFile(fileName)) {
+                                    tFile = replicaCatalog.getFile(fileName);
                                 } else {
 
                                     tFile = new FileItem(fileName, size);
-                                    ReplicaCatalog.setFile(fileName, tFile);
+                                    replicaCatalog.setFile(fileName, tFile);
                                 }
 
                                 tFile.setType(type);

@@ -29,7 +29,6 @@ import org.workflowsim.clustering.balancing.BalancedClustering;
 import org.workflowsim.utils.ClusteringParameters;
 import org.workflowsim.utils.Parameters;
 import org.workflowsim.utils.Parameters.ClassType;
-import org.workflowsim.utils.ReplicaCatalog;
 
 /**
  * ClusteringEngine is an optional component of WorkflowSim and it merges tasks

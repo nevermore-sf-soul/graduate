@@ -15,7 +15,7 @@
  *   limitations under the License.
  * 
  */
-package org.workflowsim.utils;
+package org.workflowsim;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -62,6 +62,12 @@ public class ReplicaCatalog {
         fileName2File = new HashMap<>();
     }
 
+    public ReplicaCatalog(FileSystem fs)
+    {
+        fileSystem = fs;
+        dataReplicaCatalog = new HashMap<>();
+        fileName2File = new HashMap<>();
+    }
     /**
      * Gets the file system
      *
