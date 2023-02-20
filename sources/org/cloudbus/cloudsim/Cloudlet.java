@@ -338,7 +338,7 @@ public class Cloudlet {
 		netToS = 0;
 
 		// Cloudlet length, Input and Output size should be at least 1 byte.
-		this.cloudletLength = Math.max(1, cloudletLength);
+		this.cloudletLength = cloudletLength;
 		this.cloudletFileSize = Math.max(1, cloudletFileSize);
 		this.cloudletOutputSize = Math.max(1, cloudletOutputSize);
 
@@ -443,10 +443,6 @@ public class Cloudlet {
 	 * @post $none
 	 */
 	public boolean setCloudletLength(final long cloudletLength) {
-		if (cloudletLength <= 0) {
-			return false;
-		}
-
 		this.cloudletLength = cloudletLength;
 		return true;
 	}

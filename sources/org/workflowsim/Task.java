@@ -65,9 +65,64 @@ public class Task extends Cloudlet {
      * The type of a task. 
      */
     private String type;
+    private double subdeadline;
+
+    public double getSubdeadline() {
+        return subdeadline;
+    }
+
+    public void setSubdeadline(double subdeadline) {
+        this.subdeadline = subdeadline;
+    }
+
+    public double getEsttaskearlystartTime() {
+        return esttaskearlystartTime;
+    }
+
+    public void setEsttaskearlystartTime(double esttaskearlystartTime) {
+        this.esttaskearlystartTime = esttaskearlystartTime;
+    }
 
 
+    public double getEstextTime() {
+        return estextTime;
+    }
 
+    public void setEstextTime(double estextTime) {
+        this.estextTime = estextTime;
+    }
+
+    private double esttaskearlystartTime=-1;
+
+    public double getEsttasklateststartTime() {
+        return esttasklateststartTime;
+    }
+
+    public void setEsttasklateststartTime(double esttasklateststartTime) {
+        this.esttasklateststartTime = esttasklateststartTime;
+    }
+
+    private double esttasklateststartTime=-1;
+    private double estextTime=-1;
+
+    public double getEsttaskeralyfinTime() {
+        return esttaskeralyfinTime;
+    }
+
+    public void setEsttaskeralyfinTime(double esttaskeralyfinTime) {
+        this.esttaskeralyfinTime = esttaskeralyfinTime;
+    }
+
+    public double getEsttasklatestfinTime() {
+        return esttasklatestfinTime;
+    }
+
+    public void setEsttasklatestfinTime(double esttasklatestfinTime) {
+        this.esttasklatestfinTime = esttasklatestfinTime;
+    }
+
+    private double esttaskeralyfinTime=-1;
+    private double esttasklatestfinTime=-1;
     /*
     privacy level of a task
          */

@@ -1,5 +1,6 @@
 package org.workflowsim;
 
+import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -11,5 +12,19 @@ public class util {
             return false;
         }
         return true;
+    }
+    private static final Random random;
+    public static final int MAX_TRIES = 100;
+
+    static {
+        random = new Random();
+    }
+
+    public static double randomDouble(double min, double max) {
+        if (min == max) {
+            return min;
+        } else {
+            return min + random.nextDouble() * (max - min);
+        }
     }
 }
