@@ -9,18 +9,8 @@ import org.workflowsim.utils.Parameters;
 import java.util.*;
 
 public class myalg {
-   static  List<Datacenter> datacenterList=new ArrayList<>();
-   List<Vm> VmList=new ArrayList<>();// current vms in system
-    static long[][] bandwidth;
-    int vmid;//vmid increasing automatic,when a new vm is created
-    static Map<String,Double> vmprice=new HashMap<>();
-    static Map<Integer,Double> maxspeed=new HashMap<>();
-    static Map<Integer,Integer> vmlocationvapl=new HashMap<>();
-    Map<Integer,List<Pair<Double,Double>>> vmrenthistory=new HashMap<>(); //the vm execute history,which according the unique vmId;
+    Environment environment=new Environment();
     public static void main(String[] args) {
-        myalg.init();
-        String s="s";
-        myalg x=new myalg(1,s,s,s,s,s,1.2,0.1);
 
     }
 
@@ -31,18 +21,22 @@ public class myalg {
 
     public void createvm(int vmcpucores,int datacenterid,double earlidletime)
     {
-        Vm kvm=new Vm(vmcpucores,datacenterid,vmid++,earlidletime);
-
-        VmList.add(kvm);
+        Vm kvm=new Vm(vmcpucores,datacenterid,environment.vmid++,earlidletime,vmcpucores*environment.datacenterList.get(datacenterid).getMibps());
+        environment.VmList.add(kvm);
     }
     myalg(int n,String SDM,String TRM,String HTSM,String MTSM,String LTSM,double dealinefactor,double localvmfactor)
     {
-        myparser workflowParser=new myparser("F:/WorkflowSim-1.0-master/config/dax/CyberShake_100.xml",new myreplicalog());
+        init(environment);
+        String s="s";
+        execute("F:/WorkflowSim-1.0-master/config/dax/Sipht_300.xml",s,s,s,s,s,1.2,0.1);
+    }
+    void execute(String path,String SDM,String TRM,String HTSM,String MTSM,String LTSM,double dealinefactor,double localvmfactor)
+    {
+        myparser workflowParser=new myparser(path,new myreplicalog());
         workflowParser.parse();
         List<Task> list=workflowParser.getTaskList();
         Task headtask=new Task(list.get(list.size()-1).getCloudletId()+1,0);
         Task tailtask=new Task(list.get(list.size()-1).getCloudletId()+2,0);
-
         headtask.setDepth(0);headtask.setPrivacy_level(3);tailtask.setPrivacy_level(3);
         list.sort(new Comparator<Task>() {
             @Override
@@ -68,46 +62,50 @@ public class myalg {
         baseSDM baseSDM=new SDMDepthPLSum();
         baseSDM.Settaskssubdeadline(list,deadline);
         int z=0;
+        /**
+         * calculate the max local vm nums
+         */
 
+        createlocalvms(z);
     }
-    static void init()
+    void init(Environment environment)
     {
-        vmprice.put("edge1",0.031);
-        vmprice.put("edge2",0.052);
-        vmprice.put("edge4",0.208);
-        vmprice.put("cloud1",0.0255);
-        vmprice.put("cloud2",0.0336);
-        vmprice.put("cloud4",0.1344);
-        vmprice.put("pedge1",0.031*1.5);
-        vmprice.put("pedge2",0.052*1.5);
-        vmprice.put("pedge4",0.208*1.5);
-        maxspeed.put(1,400.0);
-        maxspeed.put(2,12400.0);
-        maxspeed.put(3,20000.0);
-        vmlocationvapl.put(1,1);
-        vmlocationvapl.put(2,2);vmlocationvapl.put(3,5);
+        environment.vmprice.put("edge1",0.031);
+        environment.vmprice.put("edge2",0.052);
+        environment.vmprice.put("edge4",0.208);
+        environment.vmprice.put("cloud1",0.0255);
+        environment.vmprice.put("cloud2",0.0336);
+        environment.vmprice.put("cloud4",0.1344);
+        environment.vmprice.put("pedge1",0.031*1.5);
+        environment.vmprice.put("pedge2",0.052*1.5);
+        environment.vmprice.put("pedge4",0.208*1.5);
+        environment.maxspeed.put(1,400.0);
+        environment.maxspeed.put(2,12400.0);
+        environment.maxspeed.put(3,20000.0);
+        environment.vmlocationvapl.put(1,1);
+        environment.vmlocationvapl.put(2,2);environment.vmlocationvapl.put(3,5);
         Datacenter datacenter_0=new Datacenter(0,200,0,"Datacenter_0",new ArrayList<>(),1);
         Datacenter datacenter_1=new Datacenter(12,3100,1,"Datacenter_1",new ArrayList<>(),2);
         Datacenter datacenter_2=new Datacenter(12,3100,2,"Datacenter_2",new ArrayList<>(),3);
         Datacenter datacenter_3=new Datacenter(12,3100,3,"Datacenter_3",new ArrayList<>(),3);
         Datacenter datacenter_4=new Datacenter(3000,5000,4,"Datacenter_4",new ArrayList<>(),3);
-        bandwidth=new long[5][5];
+        environment.bandwidth=new long[5][5];
         for(int i=0;i<5;i++)
         {
-            bandwidth[i][i]=80;
+            environment.bandwidth[i][i]=80;
             if(i==0){
-                    bandwidth[i][1]=bandwidth[1][i]=Misc.randomInt(50,60);bandwidth[i][2]=bandwidth[2][i]=Misc.randomInt(50,60);bandwidth[i][3]=bandwidth[3][i]=Misc.randomInt(50,60);bandwidth[i][4]=bandwidth[4][i]=30;
+                environment.bandwidth[i][1]=environment.bandwidth[1][i]=Misc.randomInt(50,60);environment.bandwidth[i][2]=environment.bandwidth[2][i]=Misc.randomInt(50,60);environment.bandwidth[i][3]=environment.bandwidth[3][i]=Misc.randomInt(50,60);environment.bandwidth[i][4]=environment.bandwidth[4][i]=30;
                 }
             else if(i==1)
             {
-                bandwidth[i][2]=bandwidth[2][i]=Misc.randomInt(60,65);bandwidth[i][3]=bandwidth[3][i]=Misc.randomInt(60,65);bandwidth[i][4]=bandwidth[4][i]=Misc.randomInt(40,50);
+                environment.bandwidth[i][2]=environment.bandwidth[2][i]=Misc.randomInt(60,65);environment.bandwidth[i][3]=environment.bandwidth[3][i]=Misc.randomInt(60,65);environment.bandwidth[i][4]=environment.bandwidth[4][i]=Misc.randomInt(40,50);
             }
             else if(i==2)
             {
-                bandwidth[i][3]=bandwidth[3][i]=Misc.randomInt(60,65);bandwidth[i][4]=bandwidth[4][i]=Misc.randomInt(40,50);
+                environment.bandwidth[i][3]=environment.bandwidth[3][i]=Misc.randomInt(60,65);environment.bandwidth[i][4]=environment.bandwidth[4][i]=Misc.randomInt(40,50);
             }
             else if(i==3){
-                bandwidth[i][4]=bandwidth[4][i]=Misc.randomInt(40,50);
+                environment.bandwidth[i][4]=environment.bandwidth[4][i]=Misc.randomInt(40,50);
             }
         }
 
@@ -123,7 +121,7 @@ public class myalg {
             else if(i.getParentList().size()==1&&i.getParentList().get(0).getDepth()==0)
             {
                 double datasize=i.getFileList().stream().filter(item -> Parameters.FileType.INPUT==item.getType()).map(FileItem::getSize).mapToDouble(Double::doubleValue).sum();
-                i.setEstextTime(datasize/10+i.getCloudletLength()/maxspeed.get(i.getPrivacy_level()));
+                i.setEstextTime(datasize/10+i.getCloudletLength()/environment.maxspeed.get(i.getPrivacy_level()));
             }
             else{
                 double maxfilesize=0;
@@ -146,7 +144,7 @@ public class myalg {
                     }
                 }
                 maxfilesize= Arrays.stream(temp).max().orElse(0);
-                i.setEstextTime(maxfilesize/10+i.getCloudletLength()/maxspeed.get(i.getPrivacy_level()));
+                i.setEstextTime(maxfilesize/10+i.getCloudletLength()/environment.maxspeed.get(i.getPrivacy_level()));
             }
         }
     }
@@ -228,7 +226,17 @@ public class myalg {
     }
     void clearvmhistory()
     {
-
+        environment.vmid=0;
+        environment.vmrenthistory=new HashMap<>();
+        for(Datacenter i: environment.datacenterList) i.setVms(new ArrayList<>());
+        environment.VmList=new ArrayList<>();
+    }
+    void createlocalvms(int n)
+    {
+        int lvmn=(int) Math.floor((n/3.0)*2);
+        int hvmn=n-lvmn;
+        for(int i=0;i<lvmn;i++) createvm(1,0,0);
+        for(int i=0;i<hvmn;i++) createvm(2,0,0);
     }
     double calculateprices()
     {
@@ -241,6 +249,15 @@ class Vm{
     int datacenterid;
     int id;
     double earlyidletime;
+    int totalcalability;
+
+    public int getTotalcalability() {
+        return totalcalability;
+    }
+
+    public void setTotalcalability(int totalcalability) {
+        this.totalcalability = totalcalability;
+    }
 
     public double getPrice() {
         return price;
@@ -260,11 +277,12 @@ class Vm{
 
     double price;
     double totalprice;
-    public Vm(int cpucore, int datacenterid, int id, double earlyidletime) {
+    public Vm(int cpucore, int datacenterid, int id, double earlyidletime,int totalcalability) {
         this.cpucore = cpucore;
         this.datacenterid = datacenterid;
         this.id = id;
         this.earlyidletime = earlyidletime;
+
     }
 
     public int getCpucore() {
@@ -364,4 +382,15 @@ class Datacenter {
     public void setName(String name) {
         this.name = name;
     }
+}
+class Environment{
+    public   List<Datacenter> datacenterList=new ArrayList<>();
+    public List<Vm> VmList=new ArrayList<>();// current vms in system
+    public long[][] bandwidth;
+    public int vmid;//vmid increasing automatic,when a new vm is created
+    public  Map<String,Double> vmprice=new HashMap<>();
+    public Map<Integer,Double> maxspeed=new HashMap<>();
+    public  Map<Integer,Integer> vmlocationvapl=new HashMap<>();
+    public Map<Integer,List<Pair<Double,Double>>> vmrenthistory=new HashMap<>(); //the vm execute history,which according the unique vmId;
+    Environment(){}
 }

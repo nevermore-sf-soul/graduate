@@ -199,7 +199,7 @@ public final class myparser {
 
                                 String fileSize = file.getAttributeValue("size");
                                 if (fileSize != null) {
-                                    size = Double.parseDouble(fileSize) / 1024;
+                                    size = Double.parseDouble(fileSize) / 1024000;
                                 } else {
                                     Log.printLine("File Size not found for " + fileName);
                                 }
