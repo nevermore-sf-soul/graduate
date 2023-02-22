@@ -1,4 +1,4 @@
 package org.workflowsim.algorithms;
 
-public interface baseHTSM {
+public interface baseTSM2 {
 }

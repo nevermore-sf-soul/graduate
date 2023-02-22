@@ -61,6 +61,18 @@ public class Task extends Cloudlet {
      */
     private double impact;
 
+
+
+    private double rankavg;
+
+    public double getRankavg() {
+        return rankavg;
+    }
+
+    public void setRankavg(double rankavg) {
+        this.rankavg = rankavg;
+    }
+
     /*
      * The type of a task. 
      */

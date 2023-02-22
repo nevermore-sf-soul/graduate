@@ -1,4 +1,5 @@
 package org.workflowsim.algorithms;
 
-public interface baseLTSM {
+public interface baseTSM1 {
+
 }

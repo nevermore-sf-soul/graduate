@@ -2,8 +2,7 @@ package org.workflowsim;
 
 import org.apache.commons.math3.util.Pair;
 import org.cloudbus.cloudsim.File;
-import org.workflowsim.algorithms.SDMDepthPLSum;
-import org.workflowsim.algorithms.baseSDM;
+import org.workflowsim.algorithms.*;
 import org.workflowsim.utils.Parameters;
 
 import java.util.*;
@@ -11,7 +10,8 @@ import java.util.*;
 public class myalg {
     Environment environment=new Environment();
     public static void main(String[] args) {
-
+        String s="s";
+        myalg z=new myalg("F:/WorkflowSim-1.0-master/config/dax/Montage_50.xml",s,s,s,s,s,s,1.2,0.1,300,new double[]{0.2,0.3,0.5});
     }
 
     private static List<Task> calculatetaskorder(List<Task> taskList) {
@@ -24,11 +24,11 @@ public class myalg {
         Vm kvm=new Vm(vmcpucores,datacenterid,environment.vmid++,earlidletime,vmcpucores*environment.datacenterList.get(datacenterid).getMibps());
         environment.VmList.add(kvm);
     }
-    myalg(int n,String SDM,String TRM,String HTSM,String MTSM,String LTSM,double dealinefactor,double localvmfactor)
+    myalg(String path,String SDM,String TRM,String MPLTSM1,String MPLTSM2,String LPLTSM1,String LPLTSM2,double dealinefactor,double localvmfactor,int tasknum,double[] ptpercentage)
     {
         init(environment);
         String s="s";
-        execute("F:/WorkflowSim-1.0-master/config/dax/Sipht_300.xml",s,s,s,s,s,s,1.2,0.1,300,new double[]{0.2,0.3,0.5});
+        execute(path,SDM,TRM,MPLTSM1,MPLTSM2,LPLTSM1,LPLTSM2,dealinefactor,localvmfactor,tasknum,ptpercentage);
     }
     void execute(String path,String SDM,String TRM,String MPLTSM1,String MPLTSM2,String LPLTSM1,String LPLTSM2,double dealinefactor,double localvmfactor,int tasknum,double[] ptpercentage)
     {
@@ -59,8 +59,11 @@ public class myalg {
         esttaskexuteTime(list);
         double deadline=dealinefactor*caltaskestearlystarttime(list);
         caltaskestlateststartTime(list);
+        calrankavg(list);
         baseSDM baseSDM=new SDMDepthPLSum();
         baseSDM.Settaskssubdeadline(list,deadline);
+        baseTRM baseTRM=new TRMMaxRankavg();
+        baseTRM.RankTasks(list);
         int z=0;
         /**
          * calculate the max local vm nums
@@ -221,6 +224,52 @@ public class myalg {
                         i.setEsttasklateststartTime(latest);
                         i.setEsttasklatestfinTime(latest+i.getEstextTime());
                         unhandledtasknum--;
+                    }
+                }
+            }
+        }
+    }
+    void calrankavg(List<Task> list)
+    {
+        Map<Task, Double> rankprivacy=new HashMap<>();
+        Map<Task, Double> rankup=new HashMap<>();
+        int num=list.size();
+        while (num>0)
+        {
+            for(int i=list.size()-1;i>=0;i--)
+            {
+                if(rankup.get(list.get(i))==null){
+                    if(list.get(i).getChildList().size()==0)
+                    {
+                        rankprivacy.put(list.get(i),1.0/list.get(i).getPrivacy_level());
+                        rankup.put(list.get(i),0.0);
+                        num--;
+                    }
+                    else{
+                        double plsum=0;double upmax=-1;boolean flag=true;
+                        for(Task j:list.get(i).getChildList())
+                        {
+                            if(rankup.get(j)!=null&&rankprivacy.get(j)!=null)
+                            {
+                                if(upmax<rankup.get(j))
+                                {
+                                    upmax=rankup.get(j);
+                                }
+                                plsum+=(1.0/rankprivacy.get(j));}
+                            else {
+                                flag=false;
+                                break;
+                            }
+                        }
+                        if(flag)
+                        {
+                            double t1=upmax+list.get(i).getEstextTime();
+                            double t2=plsum/list.get(i).getChildList().size()+1.0/list.get(i).getPrivacy_level();
+                            rankup.put(list.get(i),t1);
+                            rankprivacy.put(list.get(i),t2);
+                            list.get(i).setRankavg((t1+t2)/2);
+                            num--;
+                        }
                     }
                 }
             }
