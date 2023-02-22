@@ -28,9 +28,9 @@ public class myalg {
     {
         init(environment);
         String s="s";
-        execute("F:/WorkflowSim-1.0-master/config/dax/Sipht_300.xml",s,s,s,s,s,1.2,0.1);
+        execute("F:/WorkflowSim-1.0-master/config/dax/Sipht_300.xml",s,s,s,s,s,s,1.2,0.1,300,new double[]{0.2,0.3,0.5});
     }
-    void execute(String path,String SDM,String TRM,String HTSM,String MTSM,String LTSM,double dealinefactor,double localvmfactor)
+    void execute(String path,String SDM,String TRM,String MPLTSM1,String MPLTSM2,String LPLTSM1,String LPLTSM2,double dealinefactor,double localvmfactor,int tasknum,double[] ptpercentage)
     {
         myparser workflowParser=new myparser(path,new myreplicalog());
         workflowParser.parse();
