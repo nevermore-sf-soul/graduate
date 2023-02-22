@@ -120,12 +120,13 @@ public class myalg {
             }
             else if(i.getParentList().size()==1&&i.getParentList().get(0).getDepth()==0)
             {
-                double datasize=i.getFileList().stream().filter(item -> Parameters.FileType.INPUT==item.getType()).map(FileItem::getSize).mapToDouble(Double::doubleValue).sum();
-                i.setEstextTime(datasize/10+i.getCloudletLength()/environment.maxspeed.get(i.getPrivacy_level()));
+                double datasize=i.getFileList().stream().filter(item -> Parameters.FileType.INPUT==item.getType()).map(FileItem::getSize).mapToDouble(Double::doubleValue).max().orElse(0);
+                double maxsize=i.getFileList().stream().filter(item -> Parameters.FileType.OUTPUT==item.getType()).map(FileItem::getSize).mapToDouble(Double::doubleValue).max().orElse(0);
+                i.setEstextTime((datasize+maxsize)/10+i.getCloudletLength()/environment.maxspeed.get(i.getPrivacy_level()));
             }
             else{
                 double maxfilesize=0;
-                double[] temp=new double[i.getParentList().size()];
+                double[] tempin=new double[i.getParentList().size()];
                 /**
                  * We set the bandwidth within a Datacenter is 80Mbps,which is the max bandwidth,
                  * So,Wherever the task is scheduled,the estbandwidth is 80.
@@ -138,13 +139,14 @@ public class myalg {
                         {
                             if(i.getParentList().get(z).getFileList().stream().anyMatch(item -> item.getName().equals(j.getName())&&item.getType()==Parameters.FileType.OUTPUT))
                             {
-                                temp[z]+=j.getSize();
+                                tempin[z]+=j.getSize();
                             }
                         }
                     }
                 }
-                maxfilesize= Arrays.stream(temp).max().orElse(0);
-                i.setEstextTime(maxfilesize/10+i.getCloudletLength()/environment.maxspeed.get(i.getPrivacy_level()));
+                maxfilesize= Arrays.stream(tempin).max().orElse(0);
+                double maxsize=i.getFileList().stream().filter(item -> Parameters.FileType.OUTPUT==item.getType()).map(FileItem::getSize).mapToDouble(Double::doubleValue).max().orElse(0);
+                i.setEstextTime((maxfilesize+maxsize)/10+i.getCloudletLength()/environment.maxspeed.get(i.getPrivacy_level()));
             }
         }
     }
