@@ -11,7 +11,9 @@ public class TRMMinFloatTime implements baseTRM{
         list.sort(new Comparator<Task>() {
             @Override
             public int compare(Task task, Task t1) {
-                return Double.compare(t1.getEsttasklateststartTime(),task.getEsttasklateststartTime());
+                if(task.getDepth()==t1.getDepth())
+                return Double.compare(task.getEsttasklateststartTime()-task.getEsttaskearlystartTime(),t1.getEsttasklateststartTime()-t1.getEsttaskearlystartTime());
+                else return task.getDepth()-t1.getDepth();
             }
         });
     }

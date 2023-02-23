@@ -12,6 +12,7 @@ public class SDMExecutiontimePrecent implements baseSDM{
         for(Task i:list)
         {
             i.setSubdeadline(i.getEsttaskeralyfinTime()+i.getEsttaskeralyfinTime()/EFT_tail*SlackTime);
+
         }
     }
 }

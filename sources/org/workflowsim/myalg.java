@@ -8,21 +8,19 @@ import org.workflowsim.utils.Parameters;
 import java.util.*;
 
 public class myalg {
-    Environment environment=new Environment();
+    public Environment environment=new Environment();
     public static void main(String[] args) {
         String s="s";
         myalg z=new myalg("F:/WorkflowSim-1.0-master/config/dax/Montage_50.xml",s,s,s,s,s,s,1.2,0.1,300,new double[]{0.2,0.3,0.5});
     }
 
-    private static List<Task> calculatetaskorder(List<Task> taskList) {
-        return null;
-    }
-
-
-    public void createvm(int vmcpucores,int datacenterid,double earlidletime)
+    public int createvm(int vmcpucores,int datacenterid,double earlidletime)
     {
         Vm kvm=new Vm(vmcpucores,datacenterid,environment.vmid++,earlidletime,vmcpucores*environment.datacenterList.get(datacenterid).getMibps());
-        environment.VmList.add(kvm);
+        environment.allVmList.add(kvm);
+        environment.curVmList.get(datacenterid).add(kvm);
+        environment.vmrenthistory.put(kvm.getId(),new ArrayList<>());
+        return kvm.getId();
     }
     myalg(String path,String SDM,String TRM,String MPLTSM1,String MPLTSM2,String LPLTSM1,String LPLTSM2,double dealinefactor,double localvmfactor,int tasknum,double[] ptpercentage)
     {
@@ -58,18 +56,23 @@ public class myalg {
         list.add(tailtask);
         esttaskexuteTime(list);
         double deadline=dealinefactor*caltaskestearlystarttime(list);
-        caltaskestlateststartTime(list);
+        caltaskestlatestfinTime(list,deadline);
         calrankavg(list);
         baseSDM baseSDM=new SDMDepthPLSum();
         baseSDM.Settaskssubdeadline(list,deadline);
         baseTRM baseTRM=new TRMMaxRankavg();
         baseTRM.RankTasks(list);
-        int z=0;
+        for(Task i:list)
+        {
+            if(i.getPrivacy_level()==1)
+            {
+
+            }
+        }
         /**
          * calculate the max local vm nums
          */
 
-        createlocalvms(z);
     }
     void init(Environment environment)
     {
@@ -124,8 +127,7 @@ public class myalg {
             else if(i.getParentList().size()==1&&i.getParentList().get(0).getDepth()==0)
             {
                 double datasize=i.getFileList().stream().filter(item -> Parameters.FileType.INPUT==item.getType()).map(FileItem::getSize).mapToDouble(Double::doubleValue).max().orElse(0);
-                double maxsize=i.getFileList().stream().filter(item -> Parameters.FileType.OUTPUT==item.getType()).map(FileItem::getSize).mapToDouble(Double::doubleValue).max().orElse(0);
-                i.setEstextTime((datasize+maxsize)/10+i.getCloudletLength()/environment.maxspeed.get(i.getPrivacy_level()));
+                i.setEstextTime((datasize)/10+i.getCloudletLength()/environment.maxspeed.get(i.getPrivacy_level()));
             }
             else{
                 double maxfilesize=0;
@@ -148,8 +150,7 @@ public class myalg {
                     }
                 }
                 maxfilesize= Arrays.stream(tempin).max().orElse(0);
-                double maxsize=i.getFileList().stream().filter(item -> Parameters.FileType.OUTPUT==item.getType()).map(FileItem::getSize).mapToDouble(Double::doubleValue).max().orElse(0);
-                i.setEstextTime((maxfilesize+maxsize)/10+i.getCloudletLength()/environment.maxspeed.get(i.getPrivacy_level()));
+                i.setEstextTime((maxfilesize)/10+i.getCloudletLength()/environment.maxspeed.get(i.getPrivacy_level()));
             }
         }
     }
@@ -192,7 +193,7 @@ public class myalg {
         }
         return max;
     }
-    void caltaskestlateststartTime(List<Task> list)
+    void caltaskestlatestfinTime(List<Task> list,double deadline)
     {
         int unhandledtasknum=list.size();
         while(unhandledtasknum>0)
@@ -202,8 +203,8 @@ public class myalg {
                 Task i=list.get(x);
                 if(i.getChildList().size()==0)
                 {
-                    i.setEsttasklateststartTime(i.getEsttaskearlystartTime());
-                    i.setEsttasklatestfinTime(i.getEsttaskearlystartTime()+i.getEstextTime());
+                    i.setEsttasklatestfinTime(deadline);
+                    i.setEsttaskearlystartTime(i.getEsttasklatestfinTime()-i.getEstextTime());
                     unhandledtasknum--;
                 }
                 else if(i.getChildList().size()!=0){
@@ -212,7 +213,7 @@ public class myalg {
                     {
                         if(j.getEsttasklateststartTime()!=-1)
                         {
-                            latest=Math.min(latest,j.getEsttasklateststartTime()-j.getEstextTime());
+                            latest=Math.min(latest,j.getEsttasklatestfinTime()-j.getEstextTime());
                         }
                         else{
                             flag=false;
@@ -221,8 +222,8 @@ public class myalg {
                     }
                     if(flag)
                     {
-                        i.setEsttasklateststartTime(latest);
-                        i.setEsttasklatestfinTime(latest+i.getEstextTime());
+                        i.setEsttasklatestfinTime(latest);
+                        i.setEsttasklateststartTime(latest-i.getEstextTime());
                         unhandledtasknum--;
                     }
                 }
@@ -280,7 +281,8 @@ public class myalg {
         environment.vmid=0;
         environment.vmrenthistory=new HashMap<>();
         for(Datacenter i: environment.datacenterList) i.setVms(new ArrayList<>());
-        environment.VmList=new ArrayList<>();
+        environment.curVmList=new ArrayList<>();
+        environment.allVmList=new ArrayList<>();
     }
     void createlocalvms(int n)
     {
@@ -293,155 +295,41 @@ public class myalg {
     {
         return 0;
     }
+    void updateTaskShcedulingInformation(Task t,Vm vm)
+    {
+        t.setVmId(vm.getId());
+
+    }
+    void updatetaskearliestlateststartTime(Task t)
+    {
+        for(Task j:t.getChildList())
+        {
+            if(t.getVmId()!=-1)
+            {
+                j.setEsttaskearlystartTime(Math.max(j.getEsttaskearlystartTime(),t.getFinishtime()));
+            }
+            else j.setEsttaskearlystartTime(Math.max(j.getEsttaskearlystartTime(),t.getEsttaskearlystartTime()));
+            j.setEsttasklateststartTime(j.getEsttaskearlystartTime()+j.getEstextTime());
+        }
+    }
+//    void subdeadlineupdate(Task t,String SDM)
+//    {
+//        if(SDM.equals("SDMExecutiontimePrecent"))
+//        {
+//            for(Task j:t.getChildList())
+//            {
+//                if(t.getVmId()!=-1)
+//                {
+//                    j.setEsttaskearlystartTime(Math.max(j.getEsttaskearlystartTime(),t.getFinishtime()));
+//                    j.setSubdeadline();
+//                }
+//                else j.setEsttaskearlystartTime(Math.max(j.getEsttaskearlystartTime(),t.getEsttaskearlystartTime()));
+//                j.setEsttasklateststartTime(j.getEsttaskearlystartTime()+j.getEstextTime());
+//            }
+//        }
+//    }
+
 }
 
-class Vm{
-    int cpucore;
-    int datacenterid;
-    int id;
-    double earlyidletime;
-    int totalcalability;
 
-    public int getTotalcalability() {
-        return totalcalability;
-    }
 
-    public void setTotalcalability(int totalcalability) {
-        this.totalcalability = totalcalability;
-    }
-
-    public double getPrice() {
-        return price;
-    }
-
-    public void setPrice(double price) {
-        this.price = price;
-    }
-
-    public double getTotalprice() {
-        return totalprice;
-    }
-
-    public void setTotalprice(double totalprice) {
-        this.totalprice = totalprice;
-    }
-
-    double price;
-    double totalprice;
-    public Vm(int cpucore, int datacenterid, int id, double earlyidletime,int totalcalability) {
-        this.cpucore = cpucore;
-        this.datacenterid = datacenterid;
-        this.id = id;
-        this.earlyidletime = earlyidletime;
-
-    }
-
-    public int getCpucore() {
-        return cpucore;
-    }
-
-    public void setCpucore(int cpucore) {
-        this.cpucore = cpucore;
-    }
-
-    public int getDatacenterid() {
-        return datacenterid;
-    }
-
-    public void setDatacenterid(int datacenterid) {
-        this.datacenterid = datacenterid;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public double getEarlyidletime() {
-        return earlyidletime;
-    }
-
-    public void setEarlyidletime(double earlyidletime) {
-        this.earlyidletime = earlyidletime;
-    }
-}
-class Datacenter {
-    private int cpucores;
-    private int mibps;
-    private int id;
-    private String name;
-    private List<Vm> vms;
-    private int privacylevel;
-    private int useablecores;
-    public Datacenter(int cpucores, int mibps, int id, String name, List<Vm> vms, int privacylevel) {
-        this.cpucores = cpucores;
-        this.mibps = mibps;
-        this.id = id;
-        this.name = name;
-        this.vms = vms;
-        this.privacylevel = privacylevel;
-        useablecores=cpucores;
-    }
-
-    public List<Vm> getVms() {
-        return vms;
-    }
-
-    public void setVms(List<Vm> vms) {
-        this.vms = vms;
-    }
-
-    public int getPrivacylevel() {
-        return privacylevel;
-    }
-
-    public void setPrivacylevel(int privacylevel) {
-        this.privacylevel = privacylevel;
-    }
-
-    public int getCpucores() {
-        return cpucores;
-    }
-
-    public void setCpucores(int cpucores) {
-        this.cpucores = cpucores;
-    }
-
-    public int getMibps() {
-        return mibps;
-    }
-
-    public void setMibps(int mibps) {
-        this.mibps = mibps;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-}
-class Environment{
-    public   List<Datacenter> datacenterList=new ArrayList<>();
-    public List<Vm> VmList=new ArrayList<>();// current vms in system
-    public long[][] bandwidth;
-    public int vmid;//vmid increasing automatic,when a new vm is created
-    public  Map<String,Double> vmprice=new HashMap<>();
-    public Map<Integer,Double> maxspeed=new HashMap<>();
-    public  Map<Integer,Integer> vmlocationvapl=new HashMap<>();
-    public Map<Integer,List<Pair<Double,Double>>> vmrenthistory=new HashMap<>(); //the vm execute history,which according the unique vmId;
-    Environment(){}
-}

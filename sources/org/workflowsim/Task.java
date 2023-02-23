@@ -78,6 +78,24 @@ public class Task extends Cloudlet {
      */
     private String type;
     private double subdeadline;
+    private double starttime;
+    private double finishtime;
+
+    public double getStarttime() {
+        return starttime;
+    }
+
+    public void setStarttime(double starttime) {
+        this.starttime = starttime;
+    }
+
+    public double getFinishtime() {
+        return finishtime;
+    }
+
+    public void setFinishtime(double finishtime) {
+        this.finishtime = finishtime;
+    }
 
     public double getSubdeadline() {
         return subdeadline;

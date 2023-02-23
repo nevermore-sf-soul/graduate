@@ -11,7 +11,9 @@ public class TRMMaxRankavg implements baseTRM{
         list.sort(new Comparator<Task>() {
             @Override
             public int compare(Task task, Task t1) {
+                if(task.getDepth()==t1.getDepth())
                 return Double.compare(t1.getRankavg(),task.getRankavg());
+                else return task.getDepth()-t1.getDepth();
             }
         });
     }
