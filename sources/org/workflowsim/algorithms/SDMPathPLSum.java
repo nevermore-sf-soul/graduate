@@ -1,5 +1,6 @@
 package org.workflowsim.algorithms;
 
+import org.workflowsim.Environment;
 import org.workflowsim.Task;
 
 import java.util.HashMap;
@@ -9,7 +10,8 @@ import java.util.Map;
 public class SDMPathPLSum implements baseSDM{
 
     @Override
-    public void Settaskssubdeadline(List<Task> list, double deadline) {
+    public void Settaskssubdeadline(Environment environment) {
+        List<Task> list=environment.list;double deadline=environment.deadline;int[] plsum=environment.plsum;
         Task head=null;
         for(Task i:list)
         {

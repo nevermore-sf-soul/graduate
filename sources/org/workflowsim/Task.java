@@ -105,12 +105,12 @@ public class Task extends Cloudlet {
         this.subdeadline = subdeadline;
     }
 
-    public double getEsttaskearlystartTime() {
-        return esttaskearlystartTime;
+    public double gettaskEarlyStartTime() {
+        return taskEarlyStartTime;
     }
 
-    public void setEsttaskearlystartTime(double esttaskearlystartTime) {
-        this.esttaskearlystartTime = esttaskearlystartTime;
+    public void settaskEarlyStartTime(double taskEarlyStartTime) {
+        this.taskEarlyStartTime = taskEarlyStartTime;
     }
 
 
@@ -122,37 +122,37 @@ public class Task extends Cloudlet {
         this.estextTime = estextTime;
     }
 
-    private double esttaskearlystartTime=-1;
+    private double taskEarlyStartTime=-1;
 
-    public double getEsttasklateststartTime() {
-        return esttasklateststartTime;
+    public double gettaskLatestStartTime() {
+        return taskLatestStartTime;
     }
 
-    public void setEsttasklateststartTime(double esttasklateststartTime) {
-        this.esttasklateststartTime = esttasklateststartTime;
+    public void settaskLatestStartTime(double taskLatestStartTime) {
+        this.taskLatestStartTime = taskLatestStartTime;
     }
 
-    private double esttasklateststartTime=-1;
+    private double taskLatestStartTime=-1;
     private double estextTime=-1;
 
-    public double getEsttaskeralyfinTime() {
-        return esttaskeralyfinTime;
+    public double gettaskEralyFinTime() {
+        return taskEralyFinTime;
     }
 
-    public void setEsttaskeralyfinTime(double esttaskeralyfinTime) {
-        this.esttaskeralyfinTime = esttaskeralyfinTime;
+    public void settaskEralyFinTime(double taskEralyFinTime) {
+        this.taskEralyFinTime = taskEralyFinTime;
     }
 
-    public double getEsttasklatestfinTime() {
-        return esttasklatestfinTime;
+    public double gettaskLatestFinTime() {
+        return taskLatestFinTime;
     }
 
-    public void setEsttasklatestfinTime(double esttasklatestfinTime) {
-        this.esttasklatestfinTime = esttasklatestfinTime;
+    public void settaskLatestFinTime(double taskLatestFinTime) {
+        this.taskLatestFinTime = taskLatestFinTime;
     }
 
-    private double esttaskeralyfinTime=-1;
-    private double esttasklatestfinTime=-1;
+    private double taskEralyFinTime=-1;
+    private double taskLatestFinTime=-1;
     /*
     privacy level of a task
          */

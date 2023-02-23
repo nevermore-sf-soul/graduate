@@ -1,5 +1,6 @@
 package org.workflowsim.algorithms;
 
+import org.workflowsim.Environment;
 import org.workflowsim.FileItem;
 import org.workflowsim.Task;
 import org.workflowsim.utils.Parameters;
@@ -9,7 +10,8 @@ import java.util.List;
 
 public class TRMTaskFeature implements baseTRM{
     @Override
-    public void RankTasks(List<Task> list) {
+    public void RankTasks(Environment environment) {
+        List<Task> list=environment.list;
         list.sort(new Comparator<Task>() {
             @Override
             public int compare(Task task, Task t1) {

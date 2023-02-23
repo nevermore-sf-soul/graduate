@@ -1,5 +1,6 @@
 package org.workflowsim.algorithms;
 
+import org.workflowsim.Environment;
 import org.workflowsim.Task;
 
 import java.util.Arrays;
@@ -7,24 +8,13 @@ import java.util.List;
 
 public class SDMDepthPLSum implements baseSDM{
     @Override
-    public void Settaskssubdeadline(List<Task> list,double deadline) {
-        double SlackTime=deadline-list.get(list.size()-1).getEsttaskeralyfinTime();
-        int[] plsum=new int[list.get(list.size()-1).getDepth()+1];
+    public void Settaskssubdeadline(Environment environment) {
+        List<Task> list=environment.list;double deadline=environment.deadline;int[] plsum=environment.plsum;
+        double SlackTime=deadline-list.get(list.size()-1).gettaskEralyFinTime();
+        int totalpl= Arrays.stream(plsum).sum();
         for(Task i:list)
         {
-            plsum[i.getDepth()]+=1.0/i.getPrivacy_level();
+            i.setSubdeadline(i.gettaskEralyFinTime()+SlackTime*(plsum[i.getDepth()]/(totalpl*1.0)));
         }
-        double totalpl= Arrays.stream(plsum).sum();
-        double pre=0;
-        for(int i=0;i<plsum.length;i++)
-        {
-            plsum[i]+=pre;
-            pre=plsum[i];
-        }
-        for(Task i:list)
-        {
-            i.setSubdeadline(i.getEsttaskeralyfinTime()+SlackTime*(plsum[i.getDepth()]/totalpl));
-        }
-
     }
 }

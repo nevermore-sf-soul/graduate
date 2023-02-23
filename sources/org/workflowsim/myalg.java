@@ -1,5 +1,7 @@
 package org.workflowsim;
 
+import org.apache.commons.math3.distribution.NormalDistribution;
+import org.apache.commons.math3.stat.StatUtils;
 import org.apache.commons.math3.util.Pair;
 import org.cloudbus.cloudsim.File;
 import org.workflowsim.algorithms.*;
@@ -8,29 +10,31 @@ import org.workflowsim.utils.Parameters;
 import java.util.*;
 
 public class myalg {
-    public Environment environment=new Environment();
+    public Environment environment;
     public static void main(String[] args) {
         String s="s";
-        myalg z=new myalg("F:/WorkflowSim-1.0-master/config/dax/Montage_50.xml",s,s,s,s,s,s,1.2,0.1,300,new double[]{0.2,0.3,0.5});
+        Environment environment=new Environment();
+        environment.init();
+        myalg z=new myalg("F:/WorkflowSim-1.0-master/config/dax/Montage_50.xml",s,s,s,s,s,s,1.2,0.1,300,new double[]{0.2,0.3,0.5},environment);
     }
 
-    public int createvm(int vmcpucores,int datacenterid,double earlidletime)
+
+    myalg(String path,String SDM,String TRM,String MPLTSM1,String MPLTSM2,String LPLTSM1,String LPLTSM2,double dealinefactor,double localvmfactor,int tasknum,double[] ptpercentage,Environment environmentin)
     {
-        Vm kvm=new Vm(vmcpucores,datacenterid,environment.vmid++,earlidletime,vmcpucores*environment.datacenterList.get(datacenterid).getMibps());
-        environment.allVmList.add(kvm);
-        environment.curVmList.get(datacenterid).add(kvm);
-        environment.vmrenthistory.put(kvm.getId(),new ArrayList<>());
-        return kvm.getId();
-    }
-    myalg(String path,String SDM,String TRM,String MPLTSM1,String MPLTSM2,String LPLTSM1,String LPLTSM2,double dealinefactor,double localvmfactor,int tasknum,double[] ptpercentage)
-    {
-        init(environment);
+        this.environment=environmentin;
         String s="s";
-        execute(path,SDM,TRM,MPLTSM1,MPLTSM2,LPLTSM1,LPLTSM2,dealinefactor,localvmfactor,tasknum,ptpercentage);
+        environment.setPath(path);environment.setSDM(SDM);
+        environment.setTRM(TRM);environment.setMPLTSM1(MPLTSM1);environment.setMPLTSM2(MPLTSM2);
+        environment.setLPLTSM1(LPLTSM1);environment.setLPLTSM1(LPLTSM2);
+        environment.setDealinefactor(dealinefactor);
+        environment.setLocalvmfactor(localvmfactor);
+        environment.setTasknum(tasknum);environment.setPtpercentage(ptpercentage);
+        execute();
+        environmentin.clearvmhistory();
     }
-    void execute(String path,String SDM,String TRM,String MPLTSM1,String MPLTSM2,String LPLTSM1,String LPLTSM2,double dealinefactor,double localvmfactor,int tasknum,double[] ptpercentage)
+    void execute()
     {
-        myparser workflowParser=new myparser(path,new myreplicalog());
+        myparser workflowParser=new myparser(environment.getPath(),new myreplicalog());
         workflowParser.parse();
         List<Task> list=workflowParser.getTaskList();
         Task headtask=new Task(list.get(list.size()-1).getCloudletId()+1,0);
@@ -54,17 +58,59 @@ public class myalg {
         }
         list.add(0,headtask);
         list.add(tailtask);
-        esttaskexuteTime(list);
-        double deadline=dealinefactor*caltaskestearlystarttime(list);
-        caltaskestlatestfinTime(list,deadline);
-        calrankavg(list);
-        baseSDM baseSDM=new SDMDepthPLSum();
-        baseSDM.Settaskssubdeadline(list,deadline);
+
+        /**
+         * 确定本地虚拟机数目
+         */
+        int x=getlocalvmnums();
+        int lvmn=(int) Math.floor((x/3.0)*2);
+        int hvmn=x-lvmn;
+        environment.datacenterList.get(0).setCpucores(lvmn+hvmn*2);
+        environment.createlocalvms(x);
+        /**
+         * 估计任务执行时间
+         */
+        esttaskexuteTime();
+        /**
+         * 确定工作流合理截止期，估计任务最早开始时间、最早结束时间
+         */
+        environment.deadline= environment.getDealinefactor()*caltaskestearlystarttime();
+        /**
+         *计算任务最晚结束时间、最晚开始时间
+         */
+        caltaskestlatestfinTime();
+        /**
+         * 如果任务排序使用了任务的rank或者在子截止期划分中使用了rank，则计算rank
+         */
+        if(environment.SDM.equals("SDMPathPLSum")||environment.TRM.equals("TRMMaxRankavg"))
+        calrankavg();
+        /**
+         * 如果子截止期划分使用了隐私等级和，则计算
+         */
+        if(environment.SDM.equals("SDMPathPLSum"))
+        {
+            environment.plsum=calplsum();
+        }
+        /**
+         * 进行子截止期划分
+         */
+        baseSDM baseSDM=new SDMPathPLSum();
+        baseSDM.Settaskssubdeadline(environment);
+        /**
+         * 进行任务排序
+         */
         baseTRM baseTRM=new TRMMaxRankavg();
-        baseTRM.RankTasks(list);
+        baseTRM.RankTasks(environment);
+        /**
+         * 进行任务调度
+         */
         for(Task i:list)
         {
             if(i.getPrivacy_level()==1)
+            {
+                HighPrivacyTaskScheduling highPrivacyTaskScheduling=new HighPrivacyTaskScheduling(environment,i);
+            }
+            else if(i.getPrivacy_level()==2)
             {
 
             }
@@ -74,50 +120,15 @@ public class myalg {
          */
 
     }
-    void init(Environment environment)
+    int getlocalvmnums()
     {
-        environment.vmprice.put("edge1",0.031);
-        environment.vmprice.put("edge2",0.052);
-        environment.vmprice.put("edge4",0.208);
-        environment.vmprice.put("cloud1",0.0255);
-        environment.vmprice.put("cloud2",0.0336);
-        environment.vmprice.put("cloud4",0.1344);
-        environment.vmprice.put("pedge1",0.031*1.5);
-        environment.vmprice.put("pedge2",0.052*1.5);
-        environment.vmprice.put("pedge4",0.208*1.5);
-        environment.maxspeed.put(1,400.0);
-        environment.maxspeed.put(2,12400.0);
-        environment.maxspeed.put(3,20000.0);
-        environment.vmlocationvapl.put(1,1);
-        environment.vmlocationvapl.put(2,2);environment.vmlocationvapl.put(3,5);
-        Datacenter datacenter_0=new Datacenter(0,200,0,"Datacenter_0",new ArrayList<>(),1);
-        Datacenter datacenter_1=new Datacenter(12,3100,1,"Datacenter_1",new ArrayList<>(),2);
-        Datacenter datacenter_2=new Datacenter(12,3100,2,"Datacenter_2",new ArrayList<>(),3);
-        Datacenter datacenter_3=new Datacenter(12,3100,3,"Datacenter_3",new ArrayList<>(),3);
-        Datacenter datacenter_4=new Datacenter(3000,5000,4,"Datacenter_4",new ArrayList<>(),3);
-        environment.bandwidth=new long[5][5];
-        for(int i=0;i<5;i++)
-        {
-            environment.bandwidth[i][i]=80;
-            if(i==0){
-                environment.bandwidth[i][1]=environment.bandwidth[1][i]=Misc.randomInt(50,60);environment.bandwidth[i][2]=environment.bandwidth[2][i]=Misc.randomInt(50,60);environment.bandwidth[i][3]=environment.bandwidth[3][i]=Misc.randomInt(50,60);environment.bandwidth[i][4]=environment.bandwidth[4][i]=30;
-                }
-            else if(i==1)
-            {
-                environment.bandwidth[i][2]=environment.bandwidth[2][i]=Misc.randomInt(60,65);environment.bandwidth[i][3]=environment.bandwidth[3][i]=Misc.randomInt(60,65);environment.bandwidth[i][4]=environment.bandwidth[4][i]=Misc.randomInt(40,50);
-            }
-            else if(i==2)
-            {
-                environment.bandwidth[i][3]=environment.bandwidth[3][i]=Misc.randomInt(60,65);environment.bandwidth[i][4]=environment.bandwidth[4][i]=Misc.randomInt(40,50);
-            }
-            else if(i==3){
-                environment.bandwidth[i][4]=environment.bandwidth[4][i]=Misc.randomInt(40,50);
-            }
-        }
 
+
+        return 0;
     }
-    void esttaskexuteTime(List<Task> list)
+    void esttaskexuteTime()
     {
+        List<Task> list=environment.list;
         for(Task i:list)
         {
             if(i.getParentList().size()==0)
@@ -126,7 +137,7 @@ public class myalg {
             }
             else if(i.getParentList().size()==1&&i.getParentList().get(0).getDepth()==0)
             {
-                double datasize=i.getFileList().stream().filter(item -> Parameters.FileType.INPUT==item.getType()).map(FileItem::getSize).mapToDouble(Double::doubleValue).max().orElse(0);
+                double datasize=i.getFileList().stream().filter(item -> Parameters.FileType.INPUT==item.getType()).map(FileItem::getSize).mapToDouble(Double::doubleValue).sum();
                 i.setEstextTime((datasize)/10+i.getCloudletLength()/environment.maxspeed.get(i.getPrivacy_level()));
             }
             else{
@@ -154,8 +165,9 @@ public class myalg {
             }
         }
     }
-    double caltaskestearlystarttime(List<Task> list)
+    double caltaskestearlystarttime()
     {
+        List<Task> list=environment.list;
         int unhandledtasknum=list.size();double max=-1;
         while(unhandledtasknum>0)
         {
@@ -163,8 +175,8 @@ public class myalg {
             {
                 if(i.getParentList().size()==0)
                 {
-                    i.setEsttaskearlystartTime(0);
-                    i.setEsttaskeralyfinTime(i.getEstextTime());
+                    i.settaskEarlyStartTime(0);
+                    i.settaskEralyFinTime(0);
                     unhandledtasknum--;
                     max=Math.max(max,0);
                 }
@@ -172,9 +184,9 @@ public class myalg {
                     boolean flag=true;double early=-1;
                     for(Task j:i.getParentList())
                     {
-                        if(j.getEsttaskearlystartTime()!=-1)
+                        if(j.gettaskEarlyStartTime()!=-1)
                         {
-                            early=Math.max(early,j.getEsttaskearlystartTime()+j.getEstextTime());
+                            early=Math.max(early,j.gettaskEarlyStartTime()+j.getEstextTime());
                         }
                         else{
                             flag=false;
@@ -183,18 +195,19 @@ public class myalg {
                     }
                     if(flag)
                     {
-                        i.setEsttaskearlystartTime(early);
-                        i.setEsttaskeralyfinTime(early+i.getEstextTime());
+                        i.settaskEarlyStartTime(early);
+                        i.settaskEralyFinTime(early+i.getEstextTime());
                         unhandledtasknum--;
-                        max=Math.max(max,early);
+                        max=Math.max(max,i.gettaskEralyFinTime());
                     }
                 }
             }
         }
         return max;
     }
-    void caltaskestlatestfinTime(List<Task> list,double deadline)
+    void caltaskestlatestfinTime()
     {
+        List<Task> list=environment.list;double deadline=environment.deadline;
         int unhandledtasknum=list.size();
         while(unhandledtasknum>0)
         {
@@ -203,17 +216,17 @@ public class myalg {
                 Task i=list.get(x);
                 if(i.getChildList().size()==0)
                 {
-                    i.setEsttasklatestfinTime(deadline);
-                    i.setEsttaskearlystartTime(i.getEsttasklatestfinTime()-i.getEstextTime());
+                    i.settaskLatestFinTime(deadline);
+                    i.settaskLatestStartTime(i.gettaskLatestFinTime()-i.getEstextTime());
                     unhandledtasknum--;
                 }
                 else if(i.getChildList().size()!=0){
                     boolean flag=true;double latest=Double.MAX_VALUE;
                     for(Task j:i.getChildList())
                     {
-                        if(j.getEsttasklateststartTime()!=-1)
+                        if(j.gettaskLatestStartTime()!=-1)
                         {
-                            latest=Math.min(latest,j.getEsttasklatestfinTime()-j.getEstextTime());
+                            latest=Math.min(latest,j.gettaskLatestFinTime()-j.getEstextTime());
                         }
                         else{
                             flag=false;
@@ -222,19 +235,23 @@ public class myalg {
                     }
                     if(flag)
                     {
-                        i.setEsttasklatestfinTime(latest);
-                        i.setEsttasklateststartTime(latest-i.getEstextTime());
+                        i.settaskLatestFinTime(latest);
+                        i.settaskLatestStartTime(latest-i.getEstextTime());
                         unhandledtasknum--;
                     }
                 }
             }
         }
+
     }
-    void calrankavg(List<Task> list)
+    void calrankavg()
     {
+        List<Task> list=environment.list;
         Map<Task, Double> rankprivacy=new HashMap<>();
         Map<Task, Double> rankup=new HashMap<>();
         int num=list.size();
+        double[] ranks1=new double[list.size()];
+        double[] ranks2=new double[list.size()];
         while (num>0)
         {
             for(int i=list.size()-1;i>=0;i--)
@@ -242,8 +259,9 @@ public class myalg {
                 if(rankup.get(list.get(i))==null){
                     if(list.get(i).getChildList().size()==0)
                     {
-                        rankprivacy.put(list.get(i),1.0/list.get(i).getPrivacy_level());
+                        rankprivacy.put(list.get(i),0.0);
                         rankup.put(list.get(i),0.0);
+                        ranks1[i]=0;ranks2[i]=0;
                         num--;
                     }
                     else{
@@ -256,7 +274,7 @@ public class myalg {
                                 {
                                     upmax=rankup.get(j);
                                 }
-                                plsum+=(1.0/rankprivacy.get(j));}
+                                plsum+=(1.0/j.getPrivacy_level());}
                             else {
                                 flag=false;
                                 break;
@@ -268,67 +286,38 @@ public class myalg {
                             double t2=plsum/list.get(i).getChildList().size()+1.0/list.get(i).getPrivacy_level();
                             rankup.put(list.get(i),t1);
                             rankprivacy.put(list.get(i),t2);
-                            list.get(i).setRankavg((t1+t2)/2);
+                            ranks1[i]=t1;ranks2[i]=t2;
                             num--;
                         }
                     }
                 }
             }
         }
-    }
-    void clearvmhistory()
-    {
-        environment.vmid=0;
-        environment.vmrenthistory=new HashMap<>();
-        for(Datacenter i: environment.datacenterList) i.setVms(new ArrayList<>());
-        environment.curVmList=new ArrayList<>();
-        environment.allVmList=new ArrayList<>();
-    }
-    void createlocalvms(int n)
-    {
-        int lvmn=(int) Math.floor((n/3.0)*2);
-        int hvmn=n-lvmn;
-        for(int i=0;i<lvmn;i++) createvm(1,0,0);
-        for(int i=0;i<hvmn;i++) createvm(2,0,0);
-    }
-    double calculateprices()
-    {
-        return 0;
-    }
-    void updateTaskShcedulingInformation(Task t,Vm vm)
-    {
-        t.setVmId(vm.getId());
-
-    }
-    void updatetaskearliestlateststartTime(Task t)
-    {
-        for(Task j:t.getChildList())
-        {
-            if(t.getVmId()!=-1)
-            {
-                j.setEsttaskearlystartTime(Math.max(j.getEsttaskearlystartTime(),t.getFinishtime()));
-            }
-            else j.setEsttaskearlystartTime(Math.max(j.getEsttaskearlystartTime(),t.getEsttaskearlystartTime()));
-            j.setEsttasklateststartTime(j.getEsttaskearlystartTime()+j.getEstextTime());
+        double mean1 = StatUtils.mean(ranks1);
+        double mean2 = StatUtils.mean(ranks2);
+        for ( int i=0;i<ranks1.length;i++ ) {
+            ranks1[i]=ranks1[i]/mean1;
+            ranks2[i]=ranks2[i]/mean2;
+            list.get(i).setRankavg((ranks1[i]+ranks2[i])/2);
         }
     }
-//    void subdeadlineupdate(Task t,String SDM)
-//    {
-//        if(SDM.equals("SDMExecutiontimePrecent"))
-//        {
-//            for(Task j:t.getChildList())
-//            {
-//                if(t.getVmId()!=-1)
-//                {
-//                    j.setEsttaskearlystartTime(Math.max(j.getEsttaskearlystartTime(),t.getFinishtime()));
-//                    j.setSubdeadline();
-//                }
-//                else j.setEsttaskearlystartTime(Math.max(j.getEsttaskearlystartTime(),t.getEsttaskearlystartTime()));
-//                j.setEsttasklateststartTime(j.getEsttaskearlystartTime()+j.getEstextTime());
-//            }
-//        }
-//    }
-
+    int[] calplsum()
+    {
+        List<Task> list=environment.list;
+        int[] plsum=new int[list.get(list.size()-1).getDepth()+1];
+        for(Task i:list)
+        {
+            plsum[i.getDepth()]+=1.0/i.getPrivacy_level();
+        }
+        double totalpl= Arrays.stream(plsum).sum();
+        double pre=0;
+        for(int i=0;i<plsum.length;i++)
+        {
+            plsum[i]+=pre;
+            pre=plsum[i];
+        }
+        return plsum;
+    }
 }
 
 

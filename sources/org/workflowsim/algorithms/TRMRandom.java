@@ -1,5 +1,6 @@
 package org.workflowsim.algorithms;
 
+import org.workflowsim.Environment;
 import org.workflowsim.Misc;
 import org.workflowsim.Task;
 
@@ -10,7 +11,8 @@ import java.util.Random;
 
 public class TRMRandom implements baseTRM{
     @Override
-    public void RankTasks(List<Task> list) {
+    public void RankTasks(Environment environment) {
+        List<Task> list=environment.list;
         list.sort(new Comparator<Task>() {
             @Override
             public int compare(Task task, Task t1) {

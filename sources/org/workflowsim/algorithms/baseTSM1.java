@@ -1,5 +1,9 @@
 package org.workflowsim.algorithms;
 
-public interface baseTSM1 {
+import org.workflowsim.Environment;
+import org.workflowsim.Task;
+import org.workflowsim.Vm;
 
+public interface baseTSM1 {
+        Vm ScheduleToLocalVms(Environment environment, Task i);
 }
