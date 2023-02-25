@@ -1,33 +1,73 @@
 package org.workflowsim;
 
 import org.apache.commons.math3.util.Pair;
+import org.workflowsim.utils.Parameters;
 
 import java.util.*;
 
 public class Environment {
         public List<Datacenter> datacenterList=new ArrayList<>();
         public List<Vm> allVmList=new ArrayList<>();
+        int edgenum,pedgenum;
         public List<List<Vm>> curVmList=new ArrayList<>();// current vms in system
         public double[][] bandwidth;
+        public double[][] maxbandwidth;
+        public double BTU=60;
         public int vmid=0;//vmid increasing automatic,when a new vm is created
         public Map<String,Double> vmprice=new HashMap<>();
         public Map<Integer,Double> maxspeed=new HashMap<>(); //不同隐私等级的任务能够获得的最大虚拟机速度
         public  Map<Integer,Integer> vmlocationvapl=new HashMap<>();
-        public Map<Integer,List<Pair<Double,Double>>> vmrenthistory=new HashMap<>(); //the vm execute history,which according the unique vmId;
+        public Map<Integer,List<TripleValue>> vmrenthistory=new HashMap<>(); //the vm execute history,which according the unique vmId;
         public List<Task>  list;
         public String path;
         public String SDM;
         public String TRM;
-        public String MPLTSM1;
-        public String MPLTSM2;
-        public String LPLTSM1;
-        public String LPLTSM2;
+        public String LPLTSMLocal;
+        public String LPLTSMUsingExistingVm;
+        public String NPLTSMLocal;
+        public String NPLTSMUsingExistingVm;
+
+        public String getLPLTSMLocal() {
+                return LPLTSMLocal;
+        }
+
+        public void setLPLTSMLocal(String LPLTSMLocal) {
+                this.LPLTSMLocal = LPLTSMLocal;
+        }
+
+
+
+        public String getNPLTSMLocal() {
+                return NPLTSMLocal;
+        }
+
+        public void setNPLTSMLocal(String NPLTSMLocal) {
+                this.NPLTSMLocal = NPLTSMLocal;
+        }
+
+        public String getLPLTSMUsingExistingVm() {
+                return LPLTSMUsingExistingVm;
+        }
+
+        public void setLPLTSMUsingExistingVm(String LPLTSMUsingExistingVm) {
+                this.LPLTSMUsingExistingVm = LPLTSMUsingExistingVm;
+        }
+
+        public String getNPLTSMUsingExistingVm() {
+                return NPLTSMUsingExistingVm;
+        }
+
+        public void setNPLTSMUsingExistingVm(String NPLTSMUsingExistingVm) {
+                this.NPLTSMUsingExistingVm = NPLTSMUsingExistingVm;
+        }
+
         public double dealinefactor;
         public double localvmfactor;
         public int tasknum;
         public double[] ptpercentage;
         public double deadline;
         public int[] plsum;
+        public Task head;public Task tail;
         public List<Task> getList() {
                 return list;
         }
@@ -60,37 +100,7 @@ public class Environment {
                 this.TRM = TRM;
         }
 
-        public String getMPLTSM1() {
-                return MPLTSM1;
-        }
 
-        public void setMPLTSM1(String MPLTSM1) {
-                this.MPLTSM1 = MPLTSM1;
-        }
-
-        public String getMPLTSM2() {
-                return MPLTSM2;
-        }
-
-        public void setMPLTSM2(String MPLTSM2) {
-                this.MPLTSM2 = MPLTSM2;
-        }
-
-        public String getLPLTSM1() {
-                return LPLTSM1;
-        }
-
-        public void setLPLTSM1(String LPLTSM1) {
-                this.LPLTSM1 = LPLTSM1;
-        }
-
-        public String getLPLTSM2() {
-                return LPLTSM2;
-        }
-
-        public void setLPLTSM2(String LPLTSM2) {
-                this.LPLTSM2 = LPLTSM2;
-        }
 
         public double getDealinefactor() {
                 return dealinefactor;
@@ -123,59 +133,106 @@ public class Environment {
         public void setPtpercentage(double[] ptpercentage) {
                 this.ptpercentage = ptpercentage;
         }
-        Environment(){}
+        public Environment(){}
 
         public void init(){
-                vmprice.put("edge1",0.031);
-                vmprice.put("edge2",0.052);
-                vmprice.put("edge4",0.208);
-                vmprice.put("cloud1",0.0255);
-                vmprice.put("cloud2",0.0336);
-                vmprice.put("cloud4",0.1344);
-                vmprice.put("pedge1",0.031*1.5);
-                vmprice.put("pedge2",0.052*1.5);
-                vmprice.put("pedge4",0.208*1.5);
+                vmprice.put("local1",0.0);
+                vmprice.put("local2",0.0);
+                vmprice.put("edge1",0.031/60);
+                vmprice.put("edge2",0.052/60);
+                vmprice.put("edge4",0.208/60);
+                vmprice.put("cloud1",0.0255/60);
+                vmprice.put("cloud2",0.0336/60);
+                vmprice.put("cloud4",0.1344/60);
+                vmprice.put("pedge1",0.031*1.5/60);
+                vmprice.put("pedge2",0.052*1.5/60);
+                vmprice.put("pedge4",0.208*1.5/60);
                 maxspeed.put(1,400.0);
                 maxspeed.put(2,12400.0);
                 maxspeed.put(3,20000.0);
-                vmlocationvapl.put(1,1);
-                vmlocationvapl.put(2,2);vmlocationvapl.put(3,5);
-                Datacenter datacenter_0=new Datacenter(0,200,0,"Datacenter_0",new ArrayList<>(),1);
-                Datacenter datacenter_1=new Datacenter(12,3100,1,"Datacenter_1",new ArrayList<>(),2);
-                Datacenter datacenter_2=new Datacenter(12,3100,2,"Datacenter_2",new ArrayList<>(),3);
-                Datacenter datacenter_3=new Datacenter(12,3100,3,"Datacenter_3",new ArrayList<>(),3);
-                Datacenter datacenter_4=new Datacenter(3000,5000,4,"Datacenter_4",new ArrayList<>(),3);
-                bandwidth=new double[5][5];
-                for(int i=0;i<5;i++)
+                vmlocationvapl.put(1,0);
+                vmlocationvapl.put(2,pedgenum);
+                vmlocationvapl.put(3,2+pedgenum+edgenum-1);
+                int localdcnum=0;
+                Datacenter datacenter_0=new Datacenter(0,200,localdcnum++,"Datacenter_0",new ArrayList<>(),1,"local");
+                datacenterList.add(datacenter_0);
+                for(int i=0;i<pedgenum;i++)
                 {
-                        bandwidth[i][i]=80/8;
-                        if(i==0){
-                                bandwidth[i][1]=bandwidth[1][i]=Misc.randomDouble(50/8.0,60/8.0);bandwidth[i][2]=bandwidth[2][i]=Misc.randomDouble(50/8.0,60/8.0);bandwidth[i][3]=bandwidth[3][i]=Misc.randomDouble(50/8.0,60/8.0);bandwidth[i][4]=bandwidth[4][i]=30/8.0;
-                        }
-                        else if(i==1)
+                        datacenterList.add(new Datacenter(12,3100,localdcnum++,"Datacenter_"+(localdcnum-1),new ArrayList<>(),2,"pedge"));
+                }
+                for(int i=0;i<edgenum;i++)
+                {
+                        datacenterList.add(new Datacenter(12,3100,localdcnum++,"Datacenter_"+(localdcnum-1),new ArrayList<>(),3,"edge"));
+                }
+                Datacenter datacenter_4=new Datacenter(3000,5000,localdcnum,"Datacenter_"+localdcnum,new ArrayList<>(),3,"cloud");
+                datacenterList.add(datacenter_4);
+                bandwidth=new double[2+pedgenum+edgenum][2+pedgenum+edgenum];
+                for(int i=0;i<2+pedgenum+edgenum;i++) curVmList.add(new ArrayList<>());
+                double internaledge=0;
+                for(int i=0;i<2+pedgenum+edgenum;i++)
+                {
+                        for(int j=i;j<2+pedgenum+edgenum;j++)
                         {
-                                bandwidth[i][2]=bandwidth[2][i]=Misc.randomDouble(60/8.0,65/8.0);bandwidth[i][3]=bandwidth[3][i]=Misc.randomDouble(60/8.0,65/8.0);bandwidth[i][4]=bandwidth[4][i]=Misc.randomDouble(40/8.0,50/8.0);
-                        }
-                        else if(i==2)
-                        {
-                                bandwidth[i][3]=bandwidth[3][i]=Misc.randomDouble(60/8.0,65/8.0);bandwidth[i][4]=bandwidth[4][i]=Misc.randomDouble(40/8.0,50/8.0);
-                        }
-                        else if(i==3){
-                                bandwidth[i][4]=bandwidth[4][i]=Misc.randomDouble(40/8.0,50/8.0);
+                                if(i==j) bandwidth[i][i]=10;
+                                else if(i==0)
+                                {
+                                        if(j<=(pedgenum+edgenum))
+                                        {
+                                                bandwidth[j][i]=bandwidth[i][j]=Misc.randomDouble(50/8.0,60/8.0);
+                                        }
+                                        else{
+                                                bandwidth[j][i]=bandwidth[i][j]=30/8.0;
+                                        }
+                                }
+                                else if(i<=(pedgenum+edgenum))
+                                {
+                                        if(j<=(pedgenum+edgenum))
+                                        {
+                                                bandwidth[i][j]=bandwidth[j][i]=Misc.randomDouble(60/8.0,65/8.0);
+                                                internaledge=Math.max(internaledge,bandwidth[i][j]);
+                                        }
+                                        else{
+                                                bandwidth[i][j]=bandwidth[j][i]=Misc.randomDouble(40/8.0,50/8.0);
+                                        }
+                                }
                         }
                 }
+                maxbandwidth=new double[4][4];
+                double max1=-1;
+                for(int i=1;i<=(pedgenum+edgenum);i++)
+                {
+                        max1=Math.max(max1,bandwidth[0][i]);
+                }
+                maxbandwidth[1][2]=maxbandwidth[2][1]=max1;
+                max1=-1;
+                for(int i=1;i<=(pedgenum+edgenum);i++)
+                {
+                        max1=Math.max(max1,bandwidth[i][1+pedgenum+edgenum]);
+                }
+                maxbandwidth[2][3]=maxbandwidth[3][2]=max1;
+                maxbandwidth[1][3]=maxbandwidth[3][1]=30/8.0;
+                maxbandwidth[1][1]=10;maxbandwidth[2][2]=internaledge;maxbandwidth[3][3]=10;
         };
         public void updateTaskShcedulingInformation(Task t,int vmid,double EarlyAvaiableTime)
         {
                 t.setVmId(vmid);
                 t.setStarttime(Math.max(t.gettaskEarlyStartTime(),allVmList.get(vmid).getEarlyidletime()));
                 t.setFinishtime(EarlyAvaiableTime);
+                if(allVmList.get(vmid).getDestoryTime()<EarlyAvaiableTime)
+                {
+                        double exceedtime=EarlyAvaiableTime-allVmList.get(vmid).getDestoryTime();
+                        allVmList.get(vmid).setDestoryTime(allVmList.get(vmid).getDestoryTime()+Math.ceil(exceedtime/BTU)*BTU);
+                }
                 allVmList.get(vmid).setEarlyidletime(EarlyAvaiableTime);
                 updatetaskearliestlateststartTime(t);
+                List<TripleValue> temp=vmrenthistory.getOrDefault(vmid,new ArrayList<>());
+                temp.add(new TripleValue(t.getCloudletId(),t.getStarttime(),t.getFinishtime()));
+                vmrenthistory.put(vmid,temp);
                 if(t.getFinishTime()>t.getSubdeadline())
                 {
                         subdeadlineupdate(t);
                 }
+
         }
         public void updatetaskearliestlateststartTime(Task t)
         {
@@ -214,29 +271,97 @@ public class Environment {
         }
         public double calculateprices()
         {
-                return 0;
+                double res=0;
+                for(Vm vm:allVmList)
+                {
+                     if(datacenterList.get(vm.getDatacenterid()).getPrivacylevel()!=1)
+                     {
+                             res+=((vm.getDestoryTime()-vm.getCreateTime())/BTU)*vm.getPrice();
+                     }
+                }
+                return res;
         }
-        public int createvm(int vmcpucores,int datacenterid,double earlyidletime)
+        public int createvm(int vmcpucores,int datacenterid,double earlyidletime,double createtime)
         {
                 Vm kvm=new Vm(vmcpucores,datacenterid,vmid++,earlyidletime,vmcpucores*datacenterList.get(datacenterid).getMibps());
                 allVmList.add(kvm);
                 curVmList.get(datacenterid).add(kvm);
+                kvm.setCreateTime(createtime);
                 vmrenthistory.put(kvm.getId(),new ArrayList<>());
+                datacenterList.get(datacenterid).setUseablecores(datacenterList.get(datacenterid).getUseablecores()-vmcpucores);
+                kvm.setPrice(vmprice.get(datacenterList.get(datacenterid).getTag()+vmcpucores));
                 return kvm.getId();
         }
-        public void createlocalvms(int n)
+        public void createlocalvms()
         {
-                int lvmn=(int) Math.floor((n/3.0)*2);
-                int hvmn=n-lvmn;
-                for(int i=0;i<lvmn;i++) createvm(1,0,0);
-                for(int i=0;i<hvmn;i++) createvm(2,0,0);
+                for(int i=0;i<2;i++) {int id=createvm(1,0,0,0);allVmList.get(id).destoryTime=Double.MAX_VALUE;allVmList.get(id).createTime=0;}
+                for(int i=0;i<3;i++) {int id=createvm(2,0,0,0);allVmList.get(id).destoryTime=Double.MAX_VALUE;allVmList.get(id).createTime=0;}
         }
         public void clearvmhistory()
         {
                 vmid=0;
                 vmrenthistory=new HashMap<>();
-                for(Datacenter i: datacenterList) i.setVms(new ArrayList<>());
+                for(Datacenter i: datacenterList) {i.setVms(new ArrayList<>());i.setUseablecores(i.getCpucores());}
                 curVmList=new ArrayList<>();
+                for(int i=0;i<2+pedgenum+edgenum;i++) curVmList.add(new ArrayList<>());
                 allVmList=new ArrayList<>();
         }
+        public double ComputeTaskFinishTime(Task i,int vmid)
+        {
+                Vm j=allVmList.get(vmid);
+                double starttime=Math.max(j.getEarlyidletime(),i.gettaskEarlyStartTime());
+                double processtime=0;
+                if(i.getParentList().size()==1&&i.getParentList().get(0).getCloudletId()==head.getCloudletId())
+                {
+                        double datasize=i.getFileList().stream().filter(item -> Parameters.FileType.INPUT==item.getType()).map(FileItem::getSize).mapToDouble(Double::doubleValue).sum();
+                        processtime=(datasize)/10+(i.getCloudletLength()*1.0)/(j.getCpucore()*datacenterList.get(j.getDatacenterid()).getMibps());
+                }
+                else{
+                        for(Task pre:i.getParentList())
+                        {
+                                double tempfile=0;
+                                if(pre.getVmId()==vmid)
+                                {
+                                        tempfile=0;
+                                }
+                                else{
+                                        for(FileItem f1:i.getFileList())
+                                        {
+                                                for(FileItem f2:pre.getFileList())
+                                                {
+                                                        if(f1.getName().equals(f2.getName())&&f1.getType()==Parameters.FileType.INPUT&&f2.getType()==Parameters.FileType.OUTPUT)
+                                                        {
+                                                                tempfile+=f1.getSize();
+                                                        }
+                                                }
+                                        }
+                                        }
+                                processtime=Math.max(processtime,(tempfile)/bandwidth[allVmList.get(pre.getVmId()).getDatacenterid()][j.getDatacenterid()]+(i.getCloudletLength()*1.0)/(j.getCpucore()*datacenterList.get(j.getDatacenterid()).getMibps()));
+                        }
+                }
+                return starttime+processtime;
+        }
+
+        public void destoryVm(int depeth)
+        {
+                double MinEST=list.stream().filter(task -> task.getDepth()==depeth&&task.getVmId()==-1).mapToDouble(Task::gettaskEarlyStartTime).min().orElse(-1);
+                for(int d=1;d<=(1+pedgenum+edgenum);d++)
+                {
+                    Iterator<Vm> iterator=curVmList.get(d).iterator();
+                    while(iterator.hasNext())
+                    {
+                       Vm vm=iterator.next();
+                            if(vm.destoryTime<=MinEST)
+                            {
+                                releaseVm(vm.getId());
+                                iterator.remove();
+                            }
+                    }
+                }
+        }
+        public void releaseVm(int Vmid) {
+                Datacenter datacenter=datacenterList.get(allVmList.get(Vmid).getDatacenterid());
+                datacenter.setUseablecores(datacenter.getUseablecores()+allVmList.get(Vmid).cpucore);
+        }
+
 }

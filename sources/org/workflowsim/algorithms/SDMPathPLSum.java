@@ -11,7 +11,7 @@ public class SDMPathPLSum implements baseSDM{
 
     @Override
     public void Settaskssubdeadline(Environment environment) {
-        List<Task> list=environment.list;double deadline=environment.deadline;int[] plsum=environment.plsum;
+        List<Task> list=environment.list;double deadline=environment.deadline;
         Task head=null;
         for(Task i:list)
         {

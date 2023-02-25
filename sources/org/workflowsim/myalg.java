@@ -14,20 +14,28 @@ public class myalg {
     public static void main(String[] args) {
         String s="s";
         Environment environment=new Environment();
+        environment.edgenum=5;environment.pedgenum=2;
         environment.init();
-        myalg z=new myalg("F:/WorkflowSim-1.0-master/config/dax/Montage_50.xml",s,s,s,s,s,s,1.2,0.1,300,new double[]{0.2,0.3,0.5},environment);
+        String[] SDM=new String[]{"SDMDepthPLSum","SDMPathPLSum","SDMExecutiontimePercent"};
+        String[] TRM=new String[]{"TRMMaxRankavg" ,"TRMMinFloatTime","TRMTaskFeature"};
+        String[] LPLTSMLocal=new String[]{"TSMLocalMinWaste","TSMLocalEarlyAvaiableTime" ,"TSMLocalEarlyFinishTime"};
+        String[] LPLTSMUsingExistingVm=new String[]{"TSMUsingExistingVmFirstAdaptSTB","TSMUsingExistingVmLongestSTB","TSMUsingExistingVmShortestSTB"};
+        int[] tasknums=new int[]{500,1000,2000,3000,4000};
+        double[] deadlinefactors=new double[]{1.5,1.6,1.7,1.8,1.9};
+        double[][] privacytaskpercent=new double[][]{{0.05,0.15,0.8},{0.1,0.2,0.7},{0.15,0.25,0.55},{0.2,0.3,0.5}};
+        String[] workflowtype=new String[]{"CyberShake","Montage","Genome","Inspiral","Sipht"};
+        myalg z=new myalg("F:/WorkflowSim-1.0-master/config/dax/Montage_300.xml",SDM[0],TRM[2],"TSMLocalMinWaste","TSMUsingExistingVmLongestSTB","TSMLocalEarlyFinishTime","TSMUsingExistingVmFirstAdaptSTB",1.5,300,new double[]{0.2,0.3,0.5},environment);
     }
 
-
-    myalg(String path,String SDM,String TRM,String MPLTSM1,String MPLTSM2,String LPLTSM1,String LPLTSM2,double dealinefactor,double localvmfactor,int tasknum,double[] ptpercentage,Environment environmentin)
+    myalg(String path,String SDM,String TRM,String LPLTSMLocal,String LPLTSMUsingExistingVm,String NPLTSMLocal,String NPLTSMUsingExistingVm,double dealinefactor,int tasknum,double[] ptpercentage,Environment environmentin)
     {
+
         this.environment=environmentin;
         String s="s";
         environment.setPath(path);environment.setSDM(SDM);
-        environment.setTRM(TRM);environment.setMPLTSM1(MPLTSM1);environment.setMPLTSM2(MPLTSM2);
-        environment.setLPLTSM1(LPLTSM1);environment.setLPLTSM1(LPLTSM2);
+        environment.setTRM(TRM);environment.setLPLTSMLocal(LPLTSMLocal);environment.setLPLTSMUsingExistingVm(LPLTSMUsingExistingVm);
+        environment.setNPLTSMLocal(NPLTSMLocal);environment.setNPLTSMUsingExistingVm(NPLTSMUsingExistingVm);
         environment.setDealinefactor(dealinefactor);
-        environment.setLocalvmfactor(localvmfactor);
         environment.setTasknum(tasknum);environment.setPtpercentage(ptpercentage);
         execute();
         environmentin.clearvmhistory();
@@ -37,6 +45,9 @@ public class myalg {
         myparser workflowParser=new myparser(environment.getPath(),new myreplicalog());
         workflowParser.parse();
         List<Task> list=workflowParser.getTaskList();
+        environment.list=list;
+        HighPrivacyTaskScheduling highPrivacyTaskScheduling=new HighPrivacyTaskScheduling(environment);
+        LNPrivacyTaskScheduling lnPrivacyTaskScheduling=new LNPrivacyTaskScheduling(environment);
         Task headtask=new Task(list.get(list.size()-1).getCloudletId()+1,0);
         Task tailtask=new Task(list.get(list.size()-1).getCloudletId()+2,0);
         headtask.setDepth(0);headtask.setPrivacy_level(3);tailtask.setPrivacy_level(3);
@@ -58,15 +69,7 @@ public class myalg {
         }
         list.add(0,headtask);
         list.add(tailtask);
-
-        /**
-         * 确定本地虚拟机数目
-         */
-        int x=getlocalvmnums();
-        int lvmn=(int) Math.floor((x/3.0)*2);
-        int hvmn=x-lvmn;
-        environment.datacenterList.get(0).setCpucores(lvmn+hvmn*2);
-        environment.createlocalvms(x);
+        environment.head=headtask;environment.tail=tailtask;
         /**
          * 估计任务执行时间
          */
@@ -75,6 +78,11 @@ public class myalg {
          * 确定工作流合理截止期，估计任务最早开始时间、最早结束时间
          */
         environment.deadline= environment.getDealinefactor()*caltaskestearlystarttime();
+        /**
+         * 确定本地虚拟机数目
+         */
+
+        environment.createlocalvms();
         /**
          *计算任务最晚结束时间、最晚开始时间
          */
@@ -87,44 +95,90 @@ public class myalg {
         /**
          * 如果子截止期划分使用了隐私等级和，则计算
          */
-        if(environment.SDM.equals("SDMPathPLSum"))
+        if(environment.SDM.equals("SDMDepthPLSum"))
         {
             environment.plsum=calplsum();
         }
         /**
          * 进行子截止期划分
          */
-        baseSDM baseSDM=new SDMPathPLSum();
+        baseSDM baseSDM=null;
+        switch (environment.SDM) {
+            case "SDMPathPLSum" -> {
+                baseSDM = new SDMPathPLSum();
+            }
+            case "SDMDepthPLSum" -> {
+                baseSDM = new SDMDepthPLSum();
+            }
+            case "SDMExecutiontimePercent" -> {
+                baseSDM = new SDMExecutiontimePrecent();
+            }
+        }
+        if(baseSDM==null) throw new IllegalArgumentException("SDM method is not determined!");
         baseSDM.Settaskssubdeadline(environment);
         /**
          * 进行任务排序
          */
-        baseTRM baseTRM=new TRMMaxRankavg();
+        baseTRM baseTRM=null;
+        switch (environment.TRM) {
+            case "TRMMaxRankavg" -> {
+                baseTRM= new TRMMaxRankavg();
+            }
+            case "TRMMinFloatTime" -> {
+                baseTRM = new TRMMinFloatTime();
+            }
+            case "TRMTaskFeature" -> {
+                baseTRM = new TRMTaskFeature();
+            }
+        }
+        if(baseTRM==null) throw new IllegalArgumentException("TRM method is not determined!");
         baseTRM.RankTasks(environment);
         /**
          * 进行任务调度
          */
         for(Task i:list)
         {
-            if(i.getPrivacy_level()==1)
+            environment.destoryVm(i.getDepth());
+            if(i.getCloudletId()==environment.head.getCloudletId())
             {
-                HighPrivacyTaskScheduling highPrivacyTaskScheduling=new HighPrivacyTaskScheduling(environment,i);
+                i.setVmId(0);
+                i.setStarttime(0.0);
+                i.setFinishtime(0.0);
+                environment.allVmList.get(0).setEarlyidletime(0.0);
             }
-            else if(i.getPrivacy_level()==2)
+            else if(i.getCloudletId()==environment.tail.getCloudletId())
             {
-
+                i.setVmId(0);
+                double MaxFT=-1;
+                for(Task j:i.getParentList())
+                {
+                    MaxFT=Math.max(MaxFT,j.getFinishtime());
+                }
+                i.setStarttime(MaxFT);i.setFinishtime(MaxFT);
+                environment.allVmList.get(0).setEarlyidletime(MaxFT);
+            }
+            else{
+                if(i.getPrivacy_level()==1)
+                {
+                    highPrivacyTaskScheduling.execute(i);
+                }
+                else
+                {
+                    lnPrivacyTaskScheduling.execute(i);
+                }
             }
         }
         /**
          * calculate the max local vm nums
          */
+        System.out.println(environment.deadline);
+            for(Task i:list)
+            {
+                if(i.getCloudletId()==headtask.getCloudletId()||i.getCloudletId()==tailtask.getCloudletId()) continue;
+                System.out.println("Task"+i.getCloudletId()+" is scheduled to VM"+i.getVmId()+" from "+i.getStarttime()+" to "+i.getFinishtime());
+            }
+        System.out.println("totalfee "+environment.calculateprices());
 
-    }
-    int getlocalvmnums()
-    {
-
-
-        return 0;
     }
     void esttaskexuteTime()
     {
@@ -143,6 +197,7 @@ public class myalg {
             else{
                 double maxfilesize=0;
                 double[] tempin=new double[i.getParentList().size()];
+                int pre=-1;
                 /**
                  * We set the bandwidth within a Datacenter is 80Mbps,which is the max bandwidth,
                  * So,Wherever the task is scheduled,the estbandwidth is 80.
@@ -160,15 +215,25 @@ public class myalg {
                         }
                     }
                 }
-                maxfilesize= Arrays.stream(tempin).max().orElse(0);
-                i.setEstextTime((maxfilesize)/10+i.getCloudletLength()/environment.maxspeed.get(i.getPrivacy_level()));
+                for(int x=0;x<tempin.length;x++)
+                {
+                    if(tempin[x]>=maxfilesize)
+                    {
+                        maxfilesize=tempin[x];
+                        pre=x;
+                    }
+                }
+                if(maxfilesize!=0)
+                i.setEstextTime((maxfilesize)/environment.maxbandwidth[i.getPrivacy_level()][i.getParentList().get(pre).getPrivacy_level()]+i.getCloudletLength()/environment.maxspeed.get(i.getPrivacy_level()));
+                else i.setEstextTime(0);
             }
         }
     }
     double caltaskestearlystarttime()
     {
         List<Task> list=environment.list;
-        int unhandledtasknum=list.size();double max=-1;
+        int unhandledtasknum=list.size();
+        double max=-1;
         while(unhandledtasknum>0)
         {
             for(Task i:list)
@@ -274,7 +339,9 @@ public class myalg {
                                 {
                                     upmax=rankup.get(j);
                                 }
-                                plsum+=(1.0/j.getPrivacy_level());}
+                                if(plsum<rankprivacy.get(j))
+                                plsum=(rankprivacy.get(j));
+                            }
                             else {
                                 flag=false;
                                 break;
@@ -283,7 +350,7 @@ public class myalg {
                         if(flag)
                         {
                             double t1=upmax+list.get(i).getEstextTime();
-                            double t2=plsum/list.get(i).getChildList().size()+1.0/list.get(i).getPrivacy_level();
+                            double t2=plsum+1.0/list.get(i).getPrivacy_level();
                             rankup.put(list.get(i),t1);
                             rankprivacy.put(list.get(i),t2);
                             ranks1[i]=t1;ranks2[i]=t2;

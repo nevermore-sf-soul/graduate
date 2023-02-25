@@ -6,6 +6,26 @@ public class Vm {
         int id;
         double earlyidletime;
         int totalcalability;
+        double createTime;
+
+    public double getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(double createTime) {
+        this.createTime = createTime;
+    }
+
+    public double getDestoryTime() {
+        return destoryTime;
+    }
+
+    public void setDestoryTime(double destoryTime) {
+        this.destoryTime = destoryTime;
+    }
+
+    double destoryTime;
+
 
         public int getTotalcalability() {
             return totalcalability;
@@ -38,7 +58,7 @@ public class Vm {
             this.datacenterid = datacenterid;
             this.id = id;
             this.earlyidletime = earlyidletime;
-
+            this.totalcalability=totalcalability;
         }
 
         public int getCpucore() {

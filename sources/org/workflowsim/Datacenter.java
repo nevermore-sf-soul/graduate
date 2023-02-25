@@ -10,7 +10,25 @@ public class Datacenter {
         private List<Vm> vms;
         private int privacylevel;
         private int useablecores;
-        public Datacenter(int cpucores, int mibps, int id, String name, List<Vm> vms, int privacylevel) {
+        private String tag;
+
+    public String getTag() {
+        return tag;
+    }
+
+    public void setTag(String tag) {
+        this.tag = tag;
+    }
+
+    public int getUseablecores() {
+        return useablecores;
+    }
+
+    public void setUseablecores(int useablecores) {
+        this.useablecores = useablecores;
+    }
+
+    public Datacenter(int cpucores, int mibps, int id, String name, List<Vm> vms, int privacylevel, String tag) {
             this.cpucores = cpucores;
             this.mibps = mibps;
             this.id = id;
@@ -18,6 +36,7 @@ public class Datacenter {
             this.vms = vms;
             this.privacylevel = privacylevel;
             useablecores=cpucores;
+            this.tag=tag;
         }
 
         public List<Vm> getVms() {

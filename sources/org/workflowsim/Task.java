@@ -185,7 +185,6 @@ public class Task extends Cloudlet {
          * change it for your own purpose.
          */
         super(taskId, taskLength, 1, 0, 0, new UtilizationModelFull(), new UtilizationModelFull(), new UtilizationModelFull());
-
         this.childList = new ArrayList<>();
         this.parentList = new ArrayList<>();
         this.fileList = new ArrayList<>();
@@ -418,4 +417,5 @@ public class Task extends Cloudlet {
         cost += costPerBw * fileSize;
         return cost;
     }
+
 }
