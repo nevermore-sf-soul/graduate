@@ -34,6 +34,7 @@ public class threadTest implements Runnable{
         myparser workflowParser = new myparser(datapath, new myreplicalog());
         workflowParser.parse();
         List<Task> list = workflowParser.getTaskList();
+
         Task headtask = new Task(list.get(list.size() - 1).getCloudletId() + 1, 0);
         Task tailtask = new Task(list.get(list.size() - 1).getCloudletId() + 2, 0);
         headtask.setDepth(0);
@@ -66,6 +67,7 @@ public class threadTest implements Runnable{
          */
         String respath = "F:/benchmark/result/" + tasknum + " [" + privacytaskpercent[0] + "," + privacytaskpercent[1] + "," + privacytaskpercent[2] + "_" + ins + "].txt";
         double totaldeadline = myalg.caltaskestearlystarttime(list);
+
         for (int k = 0; k < SDM.length; k++) {
             for (int l = 0; l < TRM.length; l++) {
                 for (int m = 0; m < LPLTSMLocal.length; m++) {

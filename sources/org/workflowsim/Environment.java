@@ -398,11 +398,11 @@ public class Environment {
                                 int d2=datacenterList.get(t1.getDatacenterid()).getPrivacylevel();
                                 if(d1==d2)
                                 {
-
+                                        return Double.compare(vm.rankorder,t1.rankorder);
                                 }
+                                else return d1-d2;
                         }
                 });
-
                 for(Vm vm:allVmList)
                 {
                         if(vm.getDatacenterid()==0)
@@ -451,7 +451,7 @@ public class Environment {
         {
                 for(Vm vm:allVmList)
                 {
-                        vmrenthistory.get(vm.getId()).stream().mapToDouble(tripleValue -> )
+                        vm.rankorder=vmrenthistory.get(vm.getId()).stream().mapToDouble(tripleValue -> taskvaTaskid.get(tripleValue.getfirstval()).getCloudletLength()).sum()/vmrenthistory.get(vm.getId()).size();
                 }
         }
 

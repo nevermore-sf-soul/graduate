@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit;
 
 public class myalg {
     public Environment environment;
-    public static ThreadPoolExecutor threadPoolExecutor=new ThreadPoolExecutor(2, 15,
+    public static ThreadPoolExecutor threadPoolExecutor=new ThreadPoolExecutor(5, 15,
             60, TimeUnit.SECONDS,
             new LinkedBlockingDeque<>(),
             new ThreadPoolExecutor.CallerRunsPolicy());
@@ -125,6 +125,10 @@ public class myalg {
         environment.setPtpercentage(ptpercentage);
         environment.head = list.get(0);
         environment.tail = list.get(list.size() - 1);
+        for (Task task:environment.list)
+        {
+            environment.taskvaTaskid.put(task.getCloudletId(),task);
+        }
         execute(ResPath);
         FileWriter fw = new FileWriter(ResPath, true);
         fw.write(tasknum + " " + Arrays.toString(ptpercentage) + " " + deadlinefactor + " " + SDM + " " + TRM + " " + LPLTSMLocal + " " + LPLTSMUsingExistingVm + " "
