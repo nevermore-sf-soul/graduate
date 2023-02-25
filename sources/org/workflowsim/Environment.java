@@ -26,6 +26,15 @@ public class Environment {
         public String LPLTSMUsingExistingVm;
         public String NPLTSMLocal;
         public String NPLTSMUsingExistingVm;
+        public Map<Integer,Task> taskvaTaskid=new HashMap<>();
+
+        public Map<Integer, Task> getTaskvaTaskid() {
+                return taskvaTaskid;
+        }
+
+        public void setTaskvaTaskid(Map<Integer, Task> taskvaTaskid) {
+                this.taskvaTaskid = taskvaTaskid;
+        }
 
         public String getLPLTSMLocal() {
                 return LPLTSMLocal;
@@ -135,7 +144,7 @@ public class Environment {
         }
         public Environment(){}
 
-        public void init(){
+        public void init1(){
                 vmprice.put("local1",0.0);
                 vmprice.put("local2",0.0);
                 vmprice.put("edge1",0.031/60);
@@ -153,21 +162,7 @@ public class Environment {
                 vmlocationvapl.put(1,0);
                 vmlocationvapl.put(2,pedgenum);
                 vmlocationvapl.put(3,2+pedgenum+edgenum-1);
-                int localdcnum=0;
-                Datacenter datacenter_0=new Datacenter(0,200,localdcnum++,"Datacenter_0",new ArrayList<>(),1,"local");
-                datacenterList.add(datacenter_0);
-                for(int i=0;i<pedgenum;i++)
-                {
-                        datacenterList.add(new Datacenter(12,3100,localdcnum++,"Datacenter_"+(localdcnum-1),new ArrayList<>(),2,"pedge"));
-                }
-                for(int i=0;i<edgenum;i++)
-                {
-                        datacenterList.add(new Datacenter(12,3100,localdcnum++,"Datacenter_"+(localdcnum-1),new ArrayList<>(),3,"edge"));
-                }
-                Datacenter datacenter_4=new Datacenter(3000,5000,localdcnum,"Datacenter_"+localdcnum,new ArrayList<>(),3,"cloud");
-                datacenterList.add(datacenter_4);
                 bandwidth=new double[2+pedgenum+edgenum][2+pedgenum+edgenum];
-                for(int i=0;i<2+pedgenum+edgenum;i++) curVmList.add(new ArrayList<>());
                 double internaledge=0;
                 for(int i=0;i<2+pedgenum+edgenum;i++)
                 {
@@ -212,7 +207,26 @@ public class Environment {
                 maxbandwidth[2][3]=maxbandwidth[3][2]=max1;
                 maxbandwidth[1][3]=maxbandwidth[3][1]=30/8.0;
                 maxbandwidth[1][1]=10;maxbandwidth[2][2]=internaledge;maxbandwidth[3][3]=10;
-        };
+        }
+        public void init2()
+        {
+                int localdcnum=0;
+                Datacenter datacenter_0=new Datacenter(0,200,localdcnum++,"Datacenter_0",new ArrayList<>(),1,"local");
+                datacenterList.add(datacenter_0);
+                for(int i=0;i<pedgenum;i++)
+                {
+                        Datacenter d=new Datacenter(12,3100,localdcnum++,"Datacenter_"+(localdcnum-1),new ArrayList<>(),2,"pedge");
+                        datacenterList.add(d);
+                }
+                for(int i=0;i<edgenum;i++)
+                {
+                        Datacenter d=new Datacenter(12,3100,localdcnum++,"Datacenter_"+(localdcnum-1),new ArrayList<>(),3,"edge");
+                        datacenterList.add(d);
+                }
+                Datacenter datacenter_4=new Datacenter(3000,5000,localdcnum,"Datacenter_"+localdcnum,new ArrayList<>(),3,"cloud");
+                datacenterList.add(datacenter_4);
+                for(int i=0;i<2+pedgenum+edgenum;i++) curVmList.add(new ArrayList<>());
+        }
         public void updateTaskShcedulingInformation(Task t,int vmid,double EarlyAvaiableTime)
         {
                 t.setVmId(vmid);
@@ -304,6 +318,16 @@ public class Environment {
                 for(Datacenter i: datacenterList) {i.setVms(new ArrayList<>());i.setUseablecores(i.getCpucores());}
                 curVmList=new ArrayList<>();
                 for(int i=0;i<2+pedgenum+edgenum;i++) curVmList.add(new ArrayList<>());
+                for(Task i:list)
+                {
+                        i.setSubdeadline(-1);
+                        i.setStarttime(-1);
+                        i.setFinishtime(-1);
+                        i.setVmId(-1);
+                        i.settaskLatestStartTime(-1);
+                        i.settaskLatestFinTime(-1);
+
+                }
                 allVmList=new ArrayList<>();
         }
         public double ComputeTaskFinishTime(Task i,int vmid)
@@ -362,6 +386,73 @@ public class Environment {
         public void releaseVm(int Vmid) {
                 Datacenter datacenter=datacenterList.get(allVmList.get(Vmid).getDatacenterid());
                 datacenter.setUseablecores(datacenter.getUseablecores()+allVmList.get(Vmid).cpucore);
+        }
+        public void adjustSchedulingResult()
+        {
+                Map<Integer,TreeMap<Double,Double>> AllSTB=computeAllSTB();
+                computeallvmorder();
+                allVmList.sort(new Comparator<Vm>() {
+                        @Override
+                        public int compare(Vm vm, Vm t1) {
+                                int d1=datacenterList.get(vm.getDatacenterid()).getPrivacylevel();
+                                int d2=datacenterList.get(t1.getDatacenterid()).getPrivacylevel();
+                                if(d1==d2)
+                                {
+
+                                }
+                        }
+                });
+
+                for(Vm vm:allVmList)
+                {
+                        if(vm.getDatacenterid()==0)
+                        {
+                                continue;
+                        }
+                        else{
+                                for()
+                        }
+                }
+        }
+        public Map<Integer, TreeMap<Double,Double>> computeAllSTB()
+        {
+                Map<Integer, TreeMap<Double,Double>> res=new HashMap<>(); //map中key为vmid，val为三值map，三值分别为任务id，空闲时间块开始时间，结束时间
+                for(Vm vm:allVmList)
+                {
+                        TreeMap<Double,Double> curSTB=new TreeMap<>();
+                        List<TripleValue> temp=vmrenthistory.get(vm.getId());
+                        temp.sort(new Comparator<TripleValue>() {
+                                @Override
+                                public int compare(TripleValue tripleValue, TripleValue t1) {
+                                        return Double.compare(tripleValue.getStartTime(),t1.getStartTime());
+                                }
+                        });
+                        double STBST=vm.getCreateTime();
+                        for(TripleValue tripleValue:temp)
+                        {
+                                if(tripleValue.getStartTime()==STBST)
+                                {
+                                        STBST=tripleValue.getFinishTime();
+                                }
+                                else{
+                                        curSTB.put(STBST,tripleValue.getStartTime());
+                                        STBST=tripleValue.getFinishTime();
+                                }
+                        }
+                        if(temp.get(temp.size()-1).getFinishTime()<vm.getDestoryTime())
+                        {
+                                curSTB.put(temp.get(temp.size()-1).getFinishTime(),vm.getDestoryTime());
+                        }
+                        res.put(vm.getId(),curSTB);
+                }
+                return res;
+        }
+        public void computeallvmorder()
+        {
+                for(Vm vm:allVmList)
+                {
+                        vmrenthistory.get(vm.getId()).stream().mapToDouble(tripleValue -> )
+                }
         }
 
 }

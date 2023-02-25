@@ -218,39 +218,7 @@ public class LNPrivacyTaskScheduling {
         }
         return res;
     }
-    public Map<Integer, TreeMap<Double,Double>> computeAllSTB()
-    {
-        Map<Integer, TreeMap<Double,Double>> res=new HashMap<>(); //map中key为vmid，val为三值map，三值分别为任务id，空闲时间块开始时间，结束时间
-            for(Vm vm:environment.allVmList)
-            {
-               TreeMap<Double,Double> curSTB=new TreeMap<>();
-               List<TripleValue> temp=environment.vmrenthistory.get(vm.getId());
-                temp.sort(new Comparator<TripleValue>() {
-                    @Override
-                    public int compare(TripleValue tripleValue, TripleValue t1) {
-                        return Double.compare(tripleValue.getStartTime(),t1.getStartTime());
-                    }
-                });
-                double STBST=vm.getCreateTime();
-                for(TripleValue tripleValue:temp)
-                {
-                    if(tripleValue.getStartTime()==STBST)
-                    {
-                        STBST=tripleValue.getFinishTime();
-                    }
-                    else{
-                        curSTB.put(STBST,tripleValue.getStartTime());
-                        STBST=tripleValue.getFinishTime();
-                    }
-                }
-                if(temp.get(temp.size()-1).getFinishTime()<vm.getDestoryTime())
-                {
-                    curSTB.put(temp.get(temp.size()-1).getFinishTime(),vm.getDestoryTime());
-                }
-                res.put(vm.getId(),curSTB);
-            }
-        return res;
-    }
+
 
     public int threecomparemin(double t1,double t2,double t3)
     {

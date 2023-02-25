@@ -50,8 +50,17 @@ public class Vm {
         public void setTotalprice(double totalprice) {
             this.totalprice = totalprice;
         }
+        double rankorder;
 
-        double price;
+    public double getRankorder() {
+        return rankorder;
+    }
+
+    public void setRankorder(double rankorder) {
+        this.rankorder = rankorder;
+    }
+
+    double price;
         double totalprice;
         public Vm(int cpucore, int datacenterid, int id, double earlyidletime,int totalcalability) {
             this.cpucore = cpucore;
