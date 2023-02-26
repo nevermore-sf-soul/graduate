@@ -544,7 +544,7 @@ public class Environment {
                                         STBST=tripleValue.getFinishTime();
                                 }
                         }
-                        if(temp.get(temp.size()-1).getFinishTime()<vm.getDestoryTime())
+                        if(temp.size()!=0&&temp.get(temp.size()-1).getFinishTime()<vm.getDestoryTime())
                         {
                                 curSTB.put(temp.get(temp.size()-1).getFinishTime(),vm.getDestoryTime());
                         }

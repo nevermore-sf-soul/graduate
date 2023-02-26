@@ -19,7 +19,7 @@ public class myalg {
             60, TimeUnit.SECONDS,
             new LinkedBlockingDeque<>(),
             new ThreadPoolExecutor.CallerRunsPolicy());
-    public static ThreadPoolExecutor threadPoolExecutor2=new ThreadPoolExecutor(21, 21,
+    public static ThreadPoolExecutor threadPoolExecutor2=new ThreadPoolExecutor(15, 21,
             60, TimeUnit.SECONDS,
             new LinkedBlockingDeque<>(),
             new ThreadPoolExecutor.CallerRunsPolicy());
@@ -34,14 +34,14 @@ public class myalg {
         String[] TRM = new String[]{"TRMMaxRankavg", "TRMMinFloatTime", "TRMTaskFeature"};
         String[] LPLTSMLocal = new String[]{"TSMLocalMinWaste", "TSMLocalEarlyAvaiableTime", "TSMLocalEarlyFinishTime"};
         String[] LPLTSMUsingExistingVm = new String[]{"TSMUsingExistingVmFirstAdaptSTB", "TSMUsingExistingVmLongestSTB", "TSMUsingExistingVmShortestSTB"};
-        int[] tasknums = new int[]{500, 1000, 2000, 3000};
+        int[] tasknums = new int[]{200,500,1000,1500};
         double[] deadlinefactors = new double[]{1.5, 1.6, 1.7, 1.8, 1.9};
         double[][] privacytaskpercent = new double[][]{{0.05, 0.15, 0.8}, {0.1, 0.2, 0.7}, {0.15, 0.25, 0.55}, {0.2, 0.3, 0.5}};
         String[] workflowtype = new String[]{"CyberShake", "Montage", "Genome", "Inspiral", "Sipht"};
 
         String prefix = "F:/benchmark/data/";
         CountDownLatch countDownLatch=new CountDownLatch(tasknums.length*privacytaskpercent.length*10);
-        for (int i = 0; i < tasknums.length; i++) {
+        for (int i = 2; i < tasknums.length; i++) {
 //            for(int j=0;j<workflowtype.length;j++)
 //            {
             for (int o = 0; o < privacytaskpercent.length; o++) {
@@ -107,7 +107,8 @@ public class myalg {
 //            }
         }
         countDownLatch.await();
-        for (int i = 0; i < tasknums.length; i++) {
+        threadPoolExecutor1.shutdownNow();
+        for (int i = 2; i < tasknums.length; i++) {
 //            for(int j=0;j<workflowtype.length;j++)
 //            {
             for (int o = 0; o < privacytaskpercent.length; o++) {
@@ -151,7 +152,7 @@ public class myalg {
         execute(ResPath);
         FileWriter fw = new FileWriter(ResPath, true);
         fw.write(tasknum + " " + Arrays.toString(ptpercentage) + " " + deadlinefactor + " " + SDM + " " + TRM + " " + LPLTSMLocal + " " + LPLTSMUsingExistingVm + " "
-                + NPLTSMLocal + " " + NPLTSMUsingExistingVm + " " +prefee+" "+afterfee+" "+ dealine+" "+environment.tail.getFinishtime());
+                + NPLTSMLocal + " " + NPLTSMUsingExistingVm +" "+afterfee+" "+ dealine+" "+environment.tail.getFinishtime());
         fw.write("\r\n");//换行
         fw.flush();
         fw.close();
@@ -239,8 +240,8 @@ public class myalg {
                 }
             }
         }
-        prefee=environment.calculateprices();
-        environment.adjustSchedulingResult();
+//        prefee=environment.calculateprices();
+//        environment.adjustSchedulingResult();
         afterfee=environment.calculateprices();
     }
 
