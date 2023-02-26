@@ -25,12 +25,12 @@ public class threadTest implements Runnable{
     public void run() {
         String prefix = "F:/benchmark/data/";
         String datapath = new String(prefix + "CyberShake_" + tasknum + " [" + privacytaskpercent[0] + "," + privacytaskpercent[1] + "," + privacytaskpercent[2] + "_" + ins + "].xml");
-        Generator generator = new Generator();
-        try {
-            generator.execute(datapath, tasknum, privacytaskpercent, workflowtype);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+//        Generator generator = new Generator();
+//        try {
+//            generator.execute(datapath, tasknum, privacytaskpercent, workflowtype);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
         myparser workflowParser = new myparser(datapath, new myreplicalog());
         workflowParser.parse();
         List<Task> list = workflowParser.getTaskList();
@@ -89,5 +89,7 @@ public class threadTest implements Runnable{
             }
         }
     }
+
+
 }
 

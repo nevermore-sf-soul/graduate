@@ -3,20 +3,27 @@ package org.workflowsim;
 import org.apache.commons.math3.stat.StatUtils;
 import org.workflowsim.algorithms.*;
 import org.workflowsim.utils.Parameters;
+import simulation.generator.Generator;
 
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 public class myalg {
     public Environment environment;
-    public static ThreadPoolExecutor threadPoolExecutor=new ThreadPoolExecutor(5, 15,
+    public static ThreadPoolExecutor threadPoolExecutor1=new ThreadPoolExecutor(5, 10,
             60, TimeUnit.SECONDS,
             new LinkedBlockingDeque<>(),
             new ThreadPoolExecutor.CallerRunsPolicy());
+    public static ThreadPoolExecutor threadPoolExecutor2=new ThreadPoolExecutor(21, 21,
+            60, TimeUnit.SECONDS,
+            new LinkedBlockingDeque<>(),
+            new ThreadPoolExecutor.CallerRunsPolicy());
+    public double prefee,afterfee;
     public static void main(String[] args) throws Exception {
         String s = "s";
         Environment environment2 = new Environment();
@@ -33,15 +40,16 @@ public class myalg {
         String[] workflowtype = new String[]{"CyberShake", "Montage", "Genome", "Inspiral", "Sipht"};
 
         String prefix = "F:/benchmark/data/";
+        CountDownLatch countDownLatch=new CountDownLatch(tasknums.length*privacytaskpercent.length*10);
         for (int i = 0; i < tasknums.length; i++) {
 //            for(int j=0;j<workflowtype.length;j++)
 //            {
             for (int o = 0; o < privacytaskpercent.length; o++) {
                 for (int ins = 0; ins < 10; ins++) {
-                    threadTest threadTest=new threadTest(tasknums[i],ins,privacytaskpercent[o],workflowtype[1],environment2);
-                    threadPoolExecutor.execute(threadTest);
-//                    String datapath = new String(prefix + "CyberShake_" + tasknums[i] + " [" + privacytaskpercent[o][0] + "," + privacytaskpercent[o][1] + "," + privacytaskpercent[o][2] + "_" + ins + "].xml");
-//                    Generator generator = new Generator();
+                    String datapath = new String(prefix + "CyberShake_" + tasknums[i] + " [" + privacytaskpercent[o][0] + "," + privacytaskpercent[o][1] + "," + privacytaskpercent[o][2] + "_" + ins + "].xml");
+                    generatethread generatethread=new generatethread(datapath, tasknums[i], privacytaskpercent[o], workflowtype[1],countDownLatch);
+                    threadPoolExecutor1.execute(generatethread);
+                    //                    Generator generator = new Generator();
 //                    generator.execute(datapath, tasknums[i], privacytaskpercent[o], workflowtype[1]);
 //                    myparser workflowParser = new myparser(datapath, new myreplicalog());
 //                    workflowParser.parse();
@@ -95,10 +103,20 @@ public class myalg {
 //                        }
 //                    }
                 }
-
             }
-
 //            }
+        }
+        countDownLatch.await();
+        for (int i = 0; i < tasknums.length; i++) {
+//            for(int j=0;j<workflowtype.length;j++)
+//            {
+            for (int o = 0; o < privacytaskpercent.length; o++) {
+                for (int ins = 0; ins < 10; ins++) {
+                    threadTest threadTest = new threadTest(tasknums[i], ins, privacytaskpercent[o], workflowtype[1], environment2);
+
+                    threadPoolExecutor2.execute(threadTest);
+                }
+            }
         }
     }
 
@@ -113,6 +131,7 @@ public class myalg {
         environment.bandwidth = environmentin.bandwidth;
         environment.list = new ArrayList<>();
         environment.list.addAll(list);
+        environment.vmrenthistory=new HashMap<>();
         environment.init2();
         environment.setSDM(SDM);
         environment.setTRM(TRM);
@@ -132,7 +151,7 @@ public class myalg {
         execute(ResPath);
         FileWriter fw = new FileWriter(ResPath, true);
         fw.write(tasknum + " " + Arrays.toString(ptpercentage) + " " + deadlinefactor + " " + SDM + " " + TRM + " " + LPLTSMLocal + " " + LPLTSMUsingExistingVm + " "
-                + NPLTSMLocal + " " + NPLTSMUsingExistingVm + " " +environment.calculateprices()+" "+ dealine+" "+environment.tail.getFinishtime());
+                + NPLTSMLocal + " " + NPLTSMUsingExistingVm + " " +prefee+" "+afterfee+" "+ dealine+" "+environment.tail.getFinishtime());
         fw.write("\r\n");//换行
         fw.flush();
         fw.close();
@@ -220,8 +239,9 @@ public class myalg {
                 }
             }
         }
-
-
+        prefee=environment.calculateprices();
+        environment.adjustSchedulingResult();
+        afterfee=environment.calculateprices();
     }
 
     static void esttaskexuteTime(List<Task> list, Environment environment) {

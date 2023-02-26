@@ -17,7 +17,7 @@ public class Environment {
         public Map<String,Double> vmprice=new HashMap<>();
         public Map<Integer,Double> maxspeed=new HashMap<>(); //不同隐私等级的任务能够获得的最大虚拟机速度
         public  Map<Integer,Integer> vmlocationvapl=new HashMap<>();
-        public Map<Integer,List<TripleValue>> vmrenthistory=new HashMap<>(); //the vm execute history,which according the unique vmId;
+        public Map<Integer,List<TripleValue>> vmrenthistory=new HashMap<>(); //map中key为vmid，val为三值List，三值分别为任务id，任务开始时间，结束时间
         public List<Task>  list;
         public String path;
         public String SDM;
@@ -290,7 +290,30 @@ public class Environment {
                 {
                      if(datacenterList.get(vm.getDatacenterid()).getPrivacylevel()!=1)
                      {
-                             res+=((vm.getDestoryTime()-vm.getCreateTime())/BTU)*vm.getPrice();
+                             List<TripleValue> tripleValues=vmrenthistory.get(vm.getId());
+                             tripleValues.sort(new Comparator<TripleValue>() {
+                                     @Override
+                                     public int compare(TripleValue tripleValue, TripleValue t1) {
+                                             return Double.compare(tripleValue.getStartTime(), t1.getStartTime());
+                                     }
+                             });
+                             double st=0;double et=0;double curfee=0;
+                             for(TripleValue tripleValue:tripleValues){
+                                if(tripleValue.getStartTime()>et)
+                                {
+                                        curfee+=(Math.ceil(et-st)/BTU*vm.getPrice());
+                                        st=tripleValue.getStartTime();
+                                        et=tripleValue.getStartTime()+Math.ceil((tripleValue.getFinishTime()-tripleValue.getStartTime())/BTU)*BTU;
+                                }
+                                else{
+                                        if(tripleValue.getFinishTime()>et)
+                                        {
+                                                et=et+Math.ceil((tripleValue.getFinishTime()-et)/BTU)*BTU;
+                                        }
+                                }
+                             }
+                             curfee+=(Math.ceil(et-st)/BTU*vm.getPrice());
+                             res+=curfee;
                      }
                 }
                 return res;
@@ -334,6 +357,12 @@ public class Environment {
         {
                 Vm j=allVmList.get(vmid);
                 double starttime=Math.max(j.getEarlyidletime(),i.gettaskEarlyStartTime());
+                double processtime=computeprocesstime(i,vmid);
+                return starttime+processtime;
+        }
+        public double computeprocesstime(Task i,int vmid)
+        {
+                Vm j=allVmList.get(vmid);
                 double processtime=0;
                 if(i.getParentList().size()==1&&i.getParentList().get(0).getCloudletId()==head.getCloudletId())
                 {
@@ -359,13 +388,12 @@ public class Environment {
                                                         }
                                                 }
                                         }
-                                        }
+                                }
                                 processtime=Math.max(processtime,(tempfile)/bandwidth[allVmList.get(pre.getVmId()).getDatacenterid()][j.getDatacenterid()]+(i.getCloudletLength()*1.0)/(j.getCpucore()*datacenterList.get(j.getDatacenterid()).getMibps()));
                         }
                 }
-                return starttime+processtime;
+                return processtime;
         }
-
         public void destoryVm(int depeth)
         {
                 double MinEST=list.stream().filter(task -> task.getDepth()==depeth&&task.getVmId()==-1).mapToDouble(Task::gettaskEarlyStartTime).min().orElse(-1);
@@ -403,20 +431,97 @@ public class Environment {
                                 else return d1-d2;
                         }
                 });
-                for(Vm vm:allVmList)
+                for(int i=0;i<allVmList.size();i++)
                 {
-                        if(vm.getDatacenterid()==0)
+                        if(allVmList.get(i).getDatacenterid()==0)
                         {
                                 continue;
                         }
-                        else{
-                                for()
+                        Vm vm=allVmList.get(i);
+                                //<taskid,<vmid,[STBstarttime,STBendtime,startadj,endtimeadj]>>
+                                boolean exsed=false;
+                                double duringst=0,duringet=0;
+                         List<Map<Integer,Map<Integer,List<Double>>>>  list=new ArrayList<>();
+                        for(TripleValue tripleValue:vmrenthistory.get(vm.getId()))
+                                {
+                                        Map<Integer,Map<Integer,List<Double>>> taskidleSTB=new HashMap<>();
+                                        if(!exsed)
+                                        {
+                                                exsed=true;
+                                                duringst=tripleValue.getStartTime();
+                                                duringet=tripleValue.getFinishTime();
+                                        }
+                                        boolean flag=false;Task curtask=taskvaTaskid.get(tripleValue.firstval);
+                                        for(int j=i+1;j<allVmList.size();j++)
+                                        {
+                                                Vm vm1=allVmList.get(j);
+                                                if(vm1.getId()!=vm.getId()&&datacenterList.get(vm1.getDatacenterid()).getPrivacylevel()<=curtask.getPrivacy_level())
+                                                {
+                                                        for(Map.Entry<Double,Double> entry:AllSTB.get(vm1.getId()).entrySet())
+                                                        {
+                                                                double stadj=Math.max(entry.getKey(),curtask.getParentList().stream().mapToDouble(Task::getFinishtime).max().orElse(0));
+                                                                double etadj=stadj+computeprocesstime(curtask,vm1.getId());
+                                                                if(stadj>=curtask.getParentList().stream().mapToDouble(Task::getFinishtime).max().orElse(0)&&
+                                                                etadj<=curtask.getChildList().stream().mapToDouble(Task::getStarttime).min().orElse(0)&&
+                                                                etadj<=entry.getValue())
+                                                                {
+                                                                        duringet=curtask.getFinishtime();
+                                                                        flag=true;
+                                                                        List<Double> time=new ArrayList<>();
+                                                                        time.add(stadj);time.add(etadj);
+                                                                        Map<Integer,List<Double>> map=new HashMap<>();
+                                                                        map.put(vm1.getId(),time);
+                                                                        taskidleSTB.put(curtask.getCloudletId(),map);
+                                                                        break;
+                                                                }
+                                                        }
+                                                        if(!flag)
+                                                        {
+                                                                exsed=false;
+                                                                if((duringet-duringst)>=BTU)
+                                                                {
+                                                                        list.add(taskidleSTB);
+                                                                }
+                                                        }
+                                                }
+
+                                        }
+                                }
+                        changetask(list);
+                }
+        }
+        public void changetask(List<Map<Integer,Map<Integer,List<Double>>>> taskidleSTBlist)
+        {
+                for(Map<Integer,Map<Integer,List<Double>>> taskidleSTB:taskidleSTBlist )
+                {
+                        for(Map.Entry<Integer,Map<Integer,List<Double>>> map1:taskidleSTB.entrySet())
+                        {
+                                int taskid=map1.getKey();
+                                Task curtask=taskvaTaskid.get(taskid);
+                                for(Map.Entry<Integer,List<Double>> map2:map1.getValue().entrySet())
+                                {
+                                        int vmid=map2.getKey();
+                                        List<TripleValue> tripleValues=vmrenthistory.get(curtask.getVmId());
+                                        Iterator<TripleValue> iterator=tripleValues.iterator();
+                                        while(iterator.hasNext())
+                                        {
+                                                TripleValue temp=iterator.next();
+                                                if(temp.getfirstval()==taskid)
+                                                {
+                                                        iterator.remove();break;
+                                                }
+                                        }
+                                        curtask.setVmId(vmid);
+                                        List<TripleValue> temp=vmrenthistory.getOrDefault(vmid,new ArrayList<>());
+                                        temp.add(new TripleValue(taskid,map2.getValue().get(0),map2.getValue().get(1)));
+                                        vmrenthistory.put(vmid,temp);
+                                }
                         }
                 }
         }
         public Map<Integer, TreeMap<Double,Double>> computeAllSTB()
         {
-                Map<Integer, TreeMap<Double,Double>> res=new HashMap<>(); //map中key为vmid，val为三值map，三值分别为任务id，空闲时间块开始时间，结束时间
+                Map<Integer, TreeMap<Double,Double>> res=new HashMap<>();
                 for(Vm vm:allVmList)
                 {
                         TreeMap<Double,Double> curSTB=new TreeMap<>();

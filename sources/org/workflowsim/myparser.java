@@ -253,7 +253,6 @@ public final class myparser {
                                     tFile = new FileItem(fileName, size);
                                     replicaCatalog.setFile(fileName, tFile);
                                 }
-
                                 tFile.setType(type);
                                 mFileList.add(tFile);
 
