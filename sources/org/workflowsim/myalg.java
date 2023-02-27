@@ -12,6 +12,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class myalg {
     public Environment environment;
@@ -41,7 +42,8 @@ public class myalg {
 
         String prefix = "F:/benchmark/data/";
         CountDownLatch countDownLatch=new CountDownLatch(tasknums.length*privacytaskpercent.length*10);
-        for (int i = 2; i < tasknums.length; i++) {
+//        CountDownLatch countDownLatch=new CountDownLatch((2)*privacytaskpercent.length*10);
+        for (int i = 0; i < tasknums.length; i++) {
 //            for(int j=0;j<workflowtype.length;j++)
 //            {
             for (int o = 0; o < privacytaskpercent.length; o++) {
@@ -104,17 +106,18 @@ public class myalg {
 //                    }
                 }
             }
-//            }
         }
+//            }
+//        }
         countDownLatch.await();
         threadPoolExecutor1.shutdownNow();
-        for (int i = 2; i < tasknums.length; i++) {
+        ReentrantLock reentrantLock=new ReentrantLock();
+        for (int i = 0; i < tasknums.length; i++) {
 //            for(int j=0;j<workflowtype.length;j++)
 //            {
-            for (int o = 0; o < privacytaskpercent.length; o++) {
+            for (double[] doubles : privacytaskpercent) {
                 for (int ins = 0; ins < 10; ins++) {
-                    threadTest threadTest = new threadTest(tasknums[i], ins, privacytaskpercent[o], workflowtype[1], environment2);
-
+                    threadTest threadTest = new threadTest(tasknums[i], ins, doubles, workflowtype[1], environment2,reentrantLock);
                     threadPoolExecutor2.execute(threadTest);
                 }
             }

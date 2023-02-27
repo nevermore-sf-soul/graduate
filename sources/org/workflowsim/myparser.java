@@ -21,6 +21,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.locks.ReentrantLock;
+
 import org.cloudbus.cloudsim.Log;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -89,15 +91,15 @@ public final class myparser {
      * Map from task name to task.
      */
     protected Map<String, Task> mName2Task;
+    private ReentrantLock reentrantLock;
 
-
-    public myparser(String daxPath,myreplicalog replicaCatalog) {
+    public myparser(String daxPath, myreplicalog replicaCatalog, ReentrantLock reentrantLock) {
         this.mName2Task = new HashMap<>();
         this.daxPath = daxPath;
         this.jobIdStartsFrom = 1;
         setTaskList(new ArrayList<>());
         this.daxPaths=null;this.userId=0;
-        this.replicaCatalog=replicaCatalog;
+        this.replicaCatalog=replicaCatalog;this.reentrantLock=reentrantLock;
     }
     /**
      * Start to parse a workflow which is a xml file(s).
@@ -131,9 +133,8 @@ public final class myparser {
      * Parse a DAX file with jdom
      */
     private void parseXmlFile(String path) {
-
+        reentrantLock.lock();
         try {
-
             SAXBuilder builder = new SAXBuilder();
             //parse using builder to get DOM representation of the XML file
             Document dom = builder.build(new File(path));
@@ -330,6 +331,8 @@ public final class myparser {
         } catch (Exception e) {
             e.printStackTrace();
             Log.printLine("Parsing Exception");
+        }finally {
+            reentrantLock.unlock();
         }
     }
 }

@@ -5,6 +5,7 @@ import simulation.generator.Generator;
 import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class threadTest implements Runnable{
     double[] privacytaskpercent;
@@ -12,13 +13,14 @@ public class threadTest implements Runnable{
     int ins;
     String workflowtype;
     Environment environment2;
+    ReentrantLock reentrantLock;
     String[] SDM = new String[]{"SDMDepthPLSum", "SDMPathPLSum", "SDMExecutiontimePercent"};
     String[] TRM = new String[]{"TRMMaxRankavg", "TRMMinFloatTime", "TRMTaskFeature"};
     String[] LPLTSMLocal = new String[]{"TSMLocalMinWaste", "TSMLocalEarlyAvaiableTime", "TSMLocalEarlyFinishTime"};
     String[] LPLTSMUsingExistingVm = new String[]{"TSMUsingExistingVmFirstAdaptSTB", "TSMUsingExistingVmLongestSTB", "TSMUsingExistingVmShortestSTB"};
     double[] deadlinefactors = new double[]{1.5, 1.6, 1.7, 1.8, 1.9};
-    threadTest(int a,int b,double[] c,String workflowtype,Environment environment) {
-        tasknum=a;ins=b;privacytaskpercent=c;this.workflowtype=workflowtype;environment2=environment;
+    threadTest(int a,int b,double[] c,String workflowtype,Environment environment,ReentrantLock reentrantLock) {
+        tasknum=a;ins=b;privacytaskpercent=c;this.workflowtype=workflowtype;environment2=environment;this.reentrantLock=reentrantLock;
     }
 
     @Override
@@ -31,7 +33,7 @@ public class threadTest implements Runnable{
 //        } catch (Exception e) {
 //            e.printStackTrace();
 //        }
-        myparser workflowParser = new myparser(datapath, new myreplicalog());
+        myparser workflowParser = new myparser(datapath, new myreplicalog(),reentrantLock);
         workflowParser.parse();
         List<Task> list = workflowParser.getTaskList();
 
