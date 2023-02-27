@@ -35,7 +35,7 @@ public class myalg {
         String[] TRM = new String[]{"TRMMaxRankavg", "TRMMinFloatTime", "TRMTaskFeature"};
         String[] LPLTSMLocal = new String[]{"TSMLocalMinWaste", "TSMLocalEarlyAvaiableTime", "TSMLocalEarlyFinishTime"};
         String[] LPLTSMUsingExistingVm = new String[]{"TSMUsingExistingVmFirstAdaptSTB", "TSMUsingExistingVmLongestSTB", "TSMUsingExistingVmShortestSTB"};
-        int[] tasknums = new int[]{200,500,1000,1500};
+        int[] tasknums = new int[]{50,100,150,200,250,300};
         double[] deadlinefactors = new double[]{1.5, 1.6, 1.7, 1.8, 1.9};
         double[][] privacytaskpercent = new double[][]{{0.05, 0.15, 0.8}, {0.1, 0.2, 0.7}, {0.15, 0.25, 0.55}, {0.2, 0.3, 0.5}};
         String[] workflowtype = new String[]{"CyberShake", "Montage", "Genome", "Inspiral", "Sipht"};
