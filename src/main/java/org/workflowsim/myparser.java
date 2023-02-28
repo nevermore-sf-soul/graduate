@@ -101,6 +101,14 @@ public final class myparser {
         this.daxPaths=null;this.userId=0;
         this.replicaCatalog=replicaCatalog;this.reentrantLock=reentrantLock;
     }
+    public myparser(String daxPath, myreplicalog replicaCatalog) {
+        this.mName2Task = new HashMap<>();
+        this.daxPath = daxPath;
+        this.jobIdStartsFrom = 1;
+        setTaskList(new ArrayList<>());
+        this.daxPaths=null;this.userId=0;
+        this.replicaCatalog=replicaCatalog;this.reentrantLock=null;
+    }
     /**
      * Start to parse a workflow which is a xml file(s).
      */
@@ -133,7 +141,7 @@ public final class myparser {
      * Parse a DAX file with jdom
      */
     private void parseXmlFile(String path) {
-        reentrantLock.lock();
+        if(reentrantLock!=null) reentrantLock.lock();
         try {
             SAXBuilder builder = new SAXBuilder();
             //parse using builder to get DOM representation of the XML file
@@ -250,7 +258,6 @@ public final class myparser {
                                 } else if (replicaCatalog.containsFile(fileName)) {
                                     tFile = replicaCatalog.getFile(fileName);
                                 } else {
-
                                     tFile = new FileItem(fileName, size);
                                     replicaCatalog.setFile(fileName, tFile);
                                 }
@@ -332,7 +339,7 @@ public final class myparser {
             e.printStackTrace();
             Log.printLine("Parsing Exception");
         }finally {
-            reentrantLock.unlock();
+            if(reentrantLock!=null) reentrantLock.unlock();
         }
     }
 }

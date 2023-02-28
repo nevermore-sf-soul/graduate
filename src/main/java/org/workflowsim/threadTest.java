@@ -26,7 +26,7 @@ public class threadTest implements Runnable{
     @Override
     public void run() {
         String prefix = "F:/benchmark/data/";
-        String datapath = new String(prefix + "CyberShake_" + tasknum + " [" + privacytaskpercent[0] + "," + privacytaskpercent[1] + "," + privacytaskpercent[2] + "_" + ins + "].xml");
+        String datapath = new String(prefix + workflowtype+" " + tasknum + " [" + privacytaskpercent[0] + "," + privacytaskpercent[1] + "," + privacytaskpercent[2] +"]"+" " + ins +".xml");
 //        Generator generator = new Generator();
 //        try {
 //            generator.execute(datapath, tasknum, privacytaskpercent, workflowtype);
@@ -67,28 +67,36 @@ public class threadTest implements Runnable{
         /**
          * 确定工作流合理截止期，估计任务最早开始时间、最早结束时间
          */
-        String respath = "F:/benchmark/result/" + tasknum + " [" + privacytaskpercent[0] + "," + privacytaskpercent[1] + "," + privacytaskpercent[2] + "_" + ins + "].txt";
+        String respath = "F:/benchmark/result/" + workflowtype+"_"+tasknum + " [" + privacytaskpercent[0] + "," + privacytaskpercent[1] + "," + privacytaskpercent[2]+ "]_"+ins+".txt";
         double totaldeadline = myalg.caltaskestearlystarttime(list);
 
-        for (int k = 0; k < SDM.length; k++) {
-            for (int l = 0; l < TRM.length; l++) {
-                for (int m = 0; m < LPLTSMLocal.length; m++) {
-                    for (int n = 0; n < LPLTSMUsingExistingVm.length; n++) {
-                        for (int x = 0; x < LPLTSMLocal.length; x++) {
-                            for (int y = 0; y < LPLTSMUsingExistingVm.length; y++) {
+//        for (int k = 0; k < SDM.length; k++) {
+//            for (int l = 0; l < TRM.length; l++) {
+//                for (int m = 0; m < LPLTSMLocal.length; m++) {
+//                    for (int n = 0; n < LPLTSMUsingExistingVm.length; n++) {
+//                        for (int x = 0; x < LPLTSMLocal.length; x++) {
+//                            for (int y = 0; y < LPLTSMUsingExistingVm.length; y++) {
+//                                for (int p = 0; p < deadlinefactors.length; p++) {
+//                                    try {
+//                                        myalg z = new myalg(list, SDM[k], TRM[l], LPLTSMLocal[m], LPLTSMUsingExistingVm[n], LPLTSMLocal[x], LPLTSMUsingExistingVm[y],
+//                                                totaldeadline * deadlinefactors[p], tasknum, privacytaskpercent, environment2, respath, deadlinefactors[p]);
+//                                    } catch (IOException e) {
+//                                        e.printStackTrace();
+//                                    }
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        }
                                 for (int p = 0; p < deadlinefactors.length; p++) {
                                     try {
-                                        myalg z = new myalg(list, SDM[k], TRM[l], LPLTSMLocal[m], LPLTSMUsingExistingVm[n], LPLTSMLocal[x], LPLTSMUsingExistingVm[y],
-                                                totaldeadline * deadlinefactors[p], tasknum, privacytaskpercent, environment2, respath, deadlinefactors[p]);
+                                        myalg z = new myalg(list, SDM[1], TRM[2], LPLTSMLocal[0], LPLTSMUsingExistingVm[2], LPLTSMLocal[0], LPLTSMUsingExistingVm[2],
+                                                totaldeadline * deadlinefactors[p], tasknum, privacytaskpercent, environment2, respath, deadlinefactors[p],ins);
                                     } catch (IOException e) {
                                         e.printStackTrace();
                                     }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
         }
     }
 
