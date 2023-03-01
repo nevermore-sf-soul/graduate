@@ -1,6 +1,7 @@
 package org.workflowsim;
 
 import org.workflowsim.algorithms.iheft;
+import org.workflowsim.algorithms.nocloud;
 import simulation.generator.Generator;
 
 import java.io.IOException;
@@ -62,12 +63,12 @@ public class ThreadTest2 {
                          */
                         String respath = "F:/benchmark/result/" +workflowtype;
                         double totaldeadline = myalg.caltaskestearlystarttime(list);
-
                         for (int p = 0; p < deadlinefactors.length; p++) {
                             try {
                                 myalg z = new myalg(list, "SDMPathPLSum", "TRMTaskFeature", "TSMLocalMinWaste", "TSMUsingExistingVmShortestSTB", "TSMLocalMinWaste", "TSMUsingExistingVmShortestSTB",
                                         totaldeadline * deadlinefactors[p], tasknums[i], privacytaskpercent[j], environment2, respath+" myalg.txt", deadlinefactors[p],ins);
                                 iheft IHEFT=new iheft(list,tasknums[i], respath+" iheft.txt",environment2,deadlinefactors[p],privacytaskpercent[j],totaldeadline * deadlinefactors[p],ins);
+                                nocloud nocloud=new nocloud(list,tasknums[i],respath+" nocloud.txt",environment2,deadlinefactors[p],privacytaskpercent[j],totaldeadline * deadlinefactors[p],ins);
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }

@@ -78,6 +78,7 @@ public class threadTest implements Runnable{
                             for (int y = 0; y < LPLTSMUsingExistingVm.length; y++) {
                                 for (int p = 0; p < deadlinefactors.length; p++) {
                                     try {
+                                        myalg.caltaskestearlystarttime(list);
                                         myalg z = new myalg(list, SDM[k], TRM[l], LPLTSMLocal[m], LPLTSMUsingExistingVm[n], LPLTSMLocal[x], LPLTSMUsingExistingVm[y],
                                                 totaldeadline * deadlinefactors[p], tasknum, privacytaskpercent, environment2, respath, deadlinefactors[p],ins);
                                     } catch (IOException e) {
