@@ -70,34 +70,27 @@ public class threadTest implements Runnable{
         String respath = "F:/benchmark/result/" + workflowtype+"_"+tasknum + " [" + privacytaskpercent[0] + "," + privacytaskpercent[1] + "," + privacytaskpercent[2]+ "]_"+ins+".txt";
         double totaldeadline = myalg.caltaskestearlystarttime(list);
 
-//        for (int k = 0; k < SDM.length; k++) {
-//            for (int l = 0; l < TRM.length; l++) {
-//                for (int m = 0; m < LPLTSMLocal.length; m++) {
-//                    for (int n = 0; n < LPLTSMUsingExistingVm.length; n++) {
-//                        for (int x = 0; x < LPLTSMLocal.length; x++) {
-//                            for (int y = 0; y < LPLTSMUsingExistingVm.length; y++) {
-//                                for (int p = 0; p < deadlinefactors.length; p++) {
-//                                    try {
-//                                        myalg z = new myalg(list, SDM[k], TRM[l], LPLTSMLocal[m], LPLTSMUsingExistingVm[n], LPLTSMLocal[x], LPLTSMUsingExistingVm[y],
-//                                                totaldeadline * deadlinefactors[p], tasknum, privacytaskpercent, environment2, respath, deadlinefactors[p]);
-//                                    } catch (IOException e) {
-//                                        e.printStackTrace();
-//                                    }
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//        }
+        for (int k = 0; k < SDM.length; k++) {
+            for (int l = 0; l < TRM.length; l++) {
+                for (int m = 0; m < LPLTSMLocal.length; m++) {
+                    for (int n = 0; n < LPLTSMUsingExistingVm.length; n++) {
+                        for (int x = 0; x < LPLTSMLocal.length; x++) {
+                            for (int y = 0; y < LPLTSMUsingExistingVm.length; y++) {
                                 for (int p = 0; p < deadlinefactors.length; p++) {
                                     try {
-                                        myalg z = new myalg(list, SDM[1], TRM[2], LPLTSMLocal[0], LPLTSMUsingExistingVm[2], LPLTSMLocal[0], LPLTSMUsingExistingVm[2],
+                                        myalg z = new myalg(list, SDM[k], TRM[l], LPLTSMLocal[m], LPLTSMUsingExistingVm[n], LPLTSMLocal[x], LPLTSMUsingExistingVm[y],
                                                 totaldeadline * deadlinefactors[p], tasknum, privacytaskpercent, environment2, respath, deadlinefactors[p],ins);
                                     } catch (IOException e) {
                                         e.printStackTrace();
                                     }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
+
     }
 
 

@@ -8,7 +8,7 @@ import java.util.*;
 public class Environment {
         public List<Datacenter> datacenterList=new ArrayList<>();
         public List<Vm> allVmList=new ArrayList<>();
-        int edgenum,pedgenum;
+        public int edgenum,pedgenum;
         public List<List<Vm>> curVmList=new ArrayList<>();// current vms in system
         public double[][] bandwidth;
         public double[][] maxbandwidth;
@@ -242,7 +242,7 @@ public class Environment {
                 List<TripleValue> temp=vmrenthistory.getOrDefault(vmid,new ArrayList<>());
                 temp.add(new TripleValue(t.getCloudletId(),t.getStarttime(),t.getFinishtime()));
                 vmrenthistory.put(vmid,temp);
-                if(t.getFinishTime()>t.getSubdeadline())
+                if(t.getSubdeadline()!=0&&t.getFinishTime()>t.getSubdeadline())
                 {
                         subdeadlineupdate(t);
                 }
@@ -319,6 +319,42 @@ public class Environment {
                 }
                 return res;
         }
+        public double calculateprices2()
+        {
+                double res=0;
+                for(Vm vm:allVmList)
+                {
+                        if(datacenterList.get(vm.getDatacenterid()).getPrivacylevel()!=1)
+                        {
+                             List<TripleValue> tripleValues=vmrenthistory.get(vm.getId());
+                             tripleValues.sort(new Comparator<TripleValue>() {
+                                     @Override
+                                     public int compare(TripleValue tripleValue, TripleValue t1) {
+                                             return Double.compare(tripleValue.getStartTime(), t1.getStartTime());
+                                     }
+                             });
+                             double st=0;double et=0;double curfee=0;
+                             for(TripleValue tripleValue:tripleValues){
+                                if(tripleValue.getStartTime()>et)
+                                {
+                                        curfee+=(Math.ceil(et-st)/BTU*vm.getPrice());
+                                        st=tripleValue.getStartTime();
+                                        et=tripleValue.getStartTime()+Math.ceil((tripleValue.getFinishTime()-tripleValue.getStartTime())/BTU)*BTU;
+                                }
+                                else{
+                                        if(tripleValue.getFinishTime()>et)
+                                        {
+                                                et=et+Math.ceil((tripleValue.getFinishTime()-et)/BTU)*BTU;
+                                        }
+                                }
+                             }
+                             curfee+=(Math.ceil(et-st)/BTU*vm.getPrice());
+                             res+=curfee;
+                        }
+                }
+                return res;
+        }
+
         public int createvm(int vmcpucores,int datacenterid,double earlyidletime,double createtime)
         {
                 Vm kvm=new Vm(vmcpucores,datacenterid,vmid++,earlyidletime,vmcpucores*datacenterList.get(datacenterid).getMibps());

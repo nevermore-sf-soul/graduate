@@ -1,5 +1,6 @@
 package org.workflowsim;
 
+import org.workflowsim.algorithms.iheft;
 import simulation.generator.Generator;
 
 import java.io.IOException;
@@ -65,7 +66,8 @@ public class ThreadTest2 {
                         for (int p = 0; p < deadlinefactors.length; p++) {
                             try {
                                 myalg z = new myalg(list, "SDMPathPLSum", "TRMTaskFeature", "TSMLocalMinWaste", "TSMUsingExistingVmShortestSTB", "TSMLocalMinWaste", "TSMUsingExistingVmShortestSTB",
-                                        totaldeadline * deadlinefactors[p], tasknums[1], privacytaskpercent[j], environment2, respath, deadlinefactors[p],ins);
+                                        totaldeadline * deadlinefactors[p], tasknums[i], privacytaskpercent[j], environment2, respath, deadlinefactors[p],ins);
+                                iheft IHEFT=new iheft(list,tasknums[i], respath,environment2,deadlinefactors[p],privacytaskpercent[j],totaldeadline * deadlinefactors[p],ins);
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }

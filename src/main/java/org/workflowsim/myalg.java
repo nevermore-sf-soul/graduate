@@ -175,7 +175,6 @@ public class myalg {
     }
 
     void execute(String ResPath) {
-        caltaskestearlystarttime(environment.list);
         HighPrivacyTaskScheduling highPrivacyTaskScheduling = new HighPrivacyTaskScheduling(environment);
         LNPrivacyTaskScheduling lnPrivacyTaskScheduling = new LNPrivacyTaskScheduling(environment);
         environment.createlocalvms();
