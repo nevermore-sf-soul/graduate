@@ -166,8 +166,7 @@ public class myalg {
         }
         execute(ResPath);
         FileWriter fw = new FileWriter(ResPath, true);
-        fw.write(tasknum + " " + Arrays.toString(ptpercentage) + " " + deadlinefactor +" "+instance+ " " + SDM + " " + TRM + " " + LPLTSMLocal + " " + LPLTSMUsingExistingVm + " "
-                + NPLTSMLocal + " " + NPLTSMUsingExistingVm +" "+afterfee+" "+ dealine+" "+environment.tail.getFinishtime());
+        fw.write(tasknum + " " + Arrays.toString(ptpercentage) + " " + deadlinefactor +" "+instance+" "+afterfee+" "+ dealine+" "+environment.tail.getFinishtime());
         fw.write("\r\n");//换行
         fw.flush();
         fw.close();

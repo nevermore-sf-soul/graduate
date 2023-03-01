@@ -60,14 +60,14 @@ public class ThreadTest2 {
                         /**
                          * 确定工作流合理截止期，估计任务最早开始时间、最早结束时间
                          */
-                        String respath = "F:/benchmark/result/" +workflowtype+".txt";
+                        String respath = "F:/benchmark/result/" +workflowtype;
                         double totaldeadline = myalg.caltaskestearlystarttime(list);
 
                         for (int p = 0; p < deadlinefactors.length; p++) {
                             try {
                                 myalg z = new myalg(list, "SDMPathPLSum", "TRMTaskFeature", "TSMLocalMinWaste", "TSMUsingExistingVmShortestSTB", "TSMLocalMinWaste", "TSMUsingExistingVmShortestSTB",
-                                        totaldeadline * deadlinefactors[p], tasknums[i], privacytaskpercent[j], environment2, respath, deadlinefactors[p],ins);
-                                iheft IHEFT=new iheft(list,tasknums[i], respath,environment2,deadlinefactors[p],privacytaskpercent[j],totaldeadline * deadlinefactors[p],ins);
+                                        totaldeadline * deadlinefactors[p], tasknums[i], privacytaskpercent[j], environment2, respath+" myalg.txt", deadlinefactors[p],ins);
+                                iheft IHEFT=new iheft(list,tasknums[i], respath+" iheft.txt",environment2,deadlinefactors[p],privacytaskpercent[j],totaldeadline * deadlinefactors[p],ins);
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }

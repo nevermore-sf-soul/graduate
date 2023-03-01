@@ -34,6 +34,7 @@ public class HEFT {
         environment.tail = list.get(list.size() - 1);
         this.deadlinefactor=deadlinefactor;this.respath=respath;
         execute();
+        environment.createlocalvms();
         FileWriter fw = new FileWriter(respath, true);
         fw.write(tasknum + " " + Arrays.toString(percentage) + " " + deadlinefactor +" "+instance+ " " +deadline+" "+environment.tail.getFinishtime());
         fw.write("\r\n");//换行
@@ -49,89 +50,107 @@ public class HEFT {
     }
     public void execute()
     {
-        for(Task i: environment.list)
+        int num=environment.list.size();
+        while(num>0)
         {
-            int ds=i.getPrivacy_level()==2?1:2;
-            environment.destoryVm(i.getDepth());
-            if (i.getCloudletId() == environment.head.getCloudletId()) {
-                i.setVmId(0);
-                i.setStarttime(0.0);
-                i.setFinishtime(0.0);
-                environment.allVmList.get(0).setEarlyidletime(0.0);
-            } else if (i.getCloudletId() == environment.tail.getCloudletId()) {
-                i.setVmId(0);
-                double MaxFT = -1;
-                for (Task j : i.getParentList()) {
-                    MaxFT = Math.max(MaxFT, j.getFinishtime());
-                }
-                i.setStarttime(MaxFT);
-                i.setFinishtime(MaxFT);
-                environment.allVmList.get(0).setEarlyidletime(MaxFT);
-            }else{
-                double min=Double.MAX_VALUE;int keyvmid=0;
-                for(int datacenterid=0;datacenterid<=environment.vmlocationvapl.get(i.getPrivacy_level());datacenterid++)
-                {
-                    for(Vm vm:environment.curVmList.get(datacenterid))
+            for(Task i: environment.list)
+            {
+                if(i.getVmId()!=-1) continue;
+                int ds=i.getPrivacy_level()==2?1:2;
+                environment.destoryVm(i.getDepth());
+                if (i.getCloudletId() == environment.head.getCloudletId()) {
+                    i.setVmId(0);
+                    i.setStarttime(0.0);
+                    i.setFinishtime(0.0);
+                    environment.allVmList.get(0).setEarlyidletime(0.0);num--;
+                } else {
+                    boolean flag=true;
+                    for(Task task:i.getParentList())
                     {
-                        double t=environment.ComputeTaskFinishTime(i,vm.getId());
-                        if(min>t)
+                        if(task.getVmId()==-1)
                         {
-                            min=t;keyvmid=vm.getId();
+                            flag=false;break;
                         }
                     }
-                }
-                int kdatacenterid=0;int kcpucore=0;
-                for(int datacenterid=ds;datacenterid<=environment.vmlocationvapl.get(i.getPrivacy_level());datacenterid++)
-                {
-                    int[] cpucores=new int[]{4,2,1};
-                    for(int cpucore:cpucores)
-                    {
-                        if(environment.datacenterList.get(datacenterid).getUseablecores()>=cpucore)
+                    if(!flag) continue;
+                    if (i.getCloudletId() == environment.tail.getCloudletId()) {
+                        i.setVmId(0);
+                        double MaxFT = -1;
+                        for (Task j : i.getParentList()) {
+                            MaxFT = Math.max(MaxFT, j.getFinishtime());
+                        }
+                        i.setStarttime(MaxFT);
+                        i.setFinishtime(MaxFT);
+                        environment.allVmList.get(0).setEarlyidletime(MaxFT);num--;
+                    }else{
+                        double min=Double.MAX_VALUE;int keyvmid=0;
+                        for(int datacenterid=0;datacenterid<=environment.vmlocationvapl.get(i.getPrivacy_level());datacenterid++)
                         {
-                            double starttime=i.gettaskEarlyStartTime();
-                            double processtime=0;
-                            if(i.getParentList().size()==1&&i.getParentList().get(0).getCloudletId()==environment.head.getCloudletId())
+                            for(Vm vm:environment.curVmList.get(datacenterid))
                             {
-                                double datasize=i.getFileList().stream().filter(item -> Parameters.FileType.INPUT==item.getType()).map(FileItem::getSize).mapToDouble(Double::doubleValue).sum();
-                                processtime=(datasize)/10+(i.getCloudletLength()*1.0)/(cpucore*environment.datacenterList.get(datacenterid).getMibps());
-                            }
-                            else{
-                                for(Task pre:i.getParentList())
+                                double t=environment.ComputeTaskFinishTime(i,vm.getId());
+                                if(min>t)
                                 {
-                                    double tempfile=0;
-                                    for(FileItem f1:i.getFileList())
-                                    {
-                                        for(FileItem f2:pre.getFileList())
-                                        {
-                                            if(f1.getName().equals(f2.getName())&&f1.getType()==Parameters.FileType.INPUT&&f2.getType()==Parameters.FileType.OUTPUT)
-                                            {
-                                                tempfile+=f1.getSize();
-                                            }
-                                        }
-                                    }
-                                    processtime=(tempfile)/environment.bandwidth[environment.allVmList.get(pre.getVmId()).getDatacenterid()][datacenterid]+(i.getCloudletLength()*1.0)/(cpucore*environment.datacenterList.get(datacenterid).getMibps());
+                                    min=t;keyvmid=vm.getId();
                                 }
                             }
-                            double ft2=starttime+processtime;
-                            if(ft2<min)
+                        }
+                        int kdatacenterid=0;int kcpucore=0;
+                        for(int datacenterid=ds;datacenterid<=environment.vmlocationvapl.get(i.getPrivacy_level());datacenterid++)
+                        {
+                            int[] cpucores=new int[]{4,2,1};
+                            for(int cpucore:cpucores)
                             {
-                                min=ft2;
-                                keyvmid=-1;
-                                kdatacenterid=datacenterid;kcpucore=cpucore;break;
+                                if(environment.datacenterList.get(datacenterid).getUseablecores()>=cpucore)
+                                {
+                                    double starttime=i.gettaskEarlyStartTime();
+                                    double processtime=0;
+                                    if(i.getParentList().size()==1&&i.getParentList().get(0).getCloudletId()==environment.head.getCloudletId())
+                                    {
+                                        double datasize=i.getFileList().stream().filter(item -> Parameters.FileType.INPUT==item.getType()).map(FileItem::getSize).mapToDouble(Double::doubleValue).sum();
+                                        processtime=(datasize)/10+(i.getCloudletLength()*1.0)/(cpucore*environment.datacenterList.get(datacenterid).getMibps());
+                                    }
+                                    else{
+                                        for(Task pre:i.getParentList())
+                                        {
+                                            double tempfile=0;
+                                            for(FileItem f1:i.getFileList())
+                                            {
+                                                for(FileItem f2:pre.getFileList())
+                                                {
+                                                    if(f1.getName().equals(f2.getName())&&f1.getType()==Parameters.FileType.INPUT&&f2.getType()==Parameters.FileType.OUTPUT)
+                                                    {
+                                                        tempfile+=f1.getSize();
+                                                    }
+                                                }
+                                            }
+                                            processtime=(tempfile)/environment.bandwidth[environment.allVmList.get(pre.getVmId()).getDatacenterid()][datacenterid]+(i.getCloudletLength()*1.0)/(cpucore*environment.datacenterList.get(datacenterid).getMibps());
+                                        }
+                                    }
+                                    double ft2=starttime+processtime;
+                                    if(ft2<min)
+                                    {
+                                        min=ft2;
+                                        keyvmid=-1;
+                                        kdatacenterid=datacenterid;kcpucore=cpucore;break;
+                                    }
+                                }
                             }
                         }
+                        if(keyvmid!=-1)
+                        {
+                            environment.updateTaskShcedulingInformation(i,keyvmid,min);
+                        }
+                        else{
+                            int id=environment.createvm(kcpucore,kdatacenterid,min,i.gettaskEarlyStartTime());
+                            environment.allVmList.get(id).setDestoryTime((Math.ceil((min-i.gettaskEarlyStartTime())/environment.BTU))*environment.BTU+i.gettaskEarlyStartTime());
+                            environment.updateTaskShcedulingInformation(i,id,min);
+                        }
+                        num--;
                     }
-                }
-                if(keyvmid!=-1)
-                {
-                    environment.updateTaskShcedulingInformation(i,keyvmid,min);
-                }
-                else{
-                    int id=environment.createvm(kcpucore,kdatacenterid,min,i.gettaskEarlyStartTime());
-                    environment.allVmList.get(id).setDestoryTime((Math.ceil((min-i.gettaskEarlyStartTime())/environment.BTU))*environment.BTU+i.gettaskEarlyStartTime());
-                    environment.updateTaskShcedulingInformation(i,id,min);
                 }
             }
         }
+
     }
 }

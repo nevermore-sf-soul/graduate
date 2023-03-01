@@ -32,6 +32,7 @@ public class iheft {
         environment.head = list.get(0);
         environment.tail = list.get(list.size() - 1);
         this.deadlinefactor=deadlinefactor;this.respath=respath;
+        environment.createlocalvms();
         execute(respath);
         FileWriter fw = new FileWriter(respath, true);
         fw.write(tasknum + " " + Arrays.toString(percentage) + " " + deadlinefactor +" "+instance+ " " +afterfee+" "+ deadline+" "+environment.tail.getFinishtime());
@@ -106,7 +107,7 @@ public class iheft {
                 if (rankup.get(list.get(i)) == null) {
                     if (list.get(i).getChildList().size() == 0) {
                         rankup.put(list.get(i), 0.0);
-                        ranks1[i] = 0;
+                        ranks1[i] = 0;num--;
                     } else {
                         double upmax = -1;
                         boolean flag = true;
