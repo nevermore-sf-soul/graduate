@@ -16,29 +16,15 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.workflowsim.threadTest;
 
 
-public class writetoexcel {
+public class writetoexcel2 {
     static Map<Integer,Integer> taskn=new HashMap<>();
     static Map<Double,Integer> deadline=new HashMap<>();
     static double[][][][] min=new double[4][4][5][10];//tasknum,privacypercent,deadlinefactor,instance
     static double[][] privacytaskpercent = new double[][]{{0.05, 0.15, 0.8}, {0.1, 0.2, 0.7}, {0.15, 0.25, 0.55}, {0.2, 0.3, 0.5}};
-    static Map<String,Integer> sdm=new HashMap<>();
-    static Map<String,Integer> trm=new HashMap<>();static Map<String,Integer> ltsm1=new HashMap<>();static Map<String,Integer> ltsm2=new HashMap<>();
-    static Map<String,Integer> ntsm1=new HashMap<>();static Map<String,Integer> ntsm2=new HashMap<>();
     public static void main(String argv[]) {
         System.setProperty("log4j.configurationFile","./path_to_the_log4j2_config_file/log4j2.xml");
         Logger log = LogManager.getLogger(writetoexcel.class.getName());
-        String[] SDM = new String[]{"SDMDepthPLSum", "SDMPathPLSum", "SDMExecutiontimePercent"};
-        sdm.put("SDMDepthPLSum",0);sdm.put("SDMPathPLSum",1);sdm.put("SDMExecutiontimePercent",2);
-        String[] TRM = new String[]{"TRMMaxRankavg", "TRMMinFloatTime", "TRMTaskFeature"};
-        trm.put("TRMMaxRankavg",0);trm.put("TRMMinFloatTime",1);trm.put("TRMTaskFeature",2);
-        String[] LPLTSMLocal = new String[]{"TSMLocalMinWaste", "TSMLocalEarlyAvaiableTime", "TSMLocalEarlyFinishTime"};
-        ltsm1.put("TSMLocalMinWaste",0);ltsm1.put("TSMLocalEarlyAvaiableTime",1);ltsm1.put("TSMLocalEarlyFinishTime",2);
-        ntsm1.put("TSMLocalMinWaste",0);ntsm1.put("TSMLocalEarlyAvaiableTime",1);ntsm1.put("TSMLocalEarlyFinishTime",2);
-        String[] LPLTSMUsingExistingVm = new String[]{"TSMUsingExistingVmFirstAdaptSTB", "TSMUsingExistingVmLongestSTB", "TSMUsingExistingVmShortestSTB"};
-        ltsm2.put("TSMUsingExistingVmFirstAdaptSTB",0);ltsm2.put("TSMUsingExistingVmLongestSTB",1);ltsm2.put("TSMUsingExistingVmShortestSTB",2);
-        ntsm2.put("TSMUsingExistingVmFirstAdaptSTB",0);ntsm2.put("TSMUsingExistingVmLongestSTB",1);ntsm2.put("TSMUsingExistingVmShortestSTB",2);
         int[] tasknums = new int[]{150,200,250,300};
-//        int[] tasknums = new int[]{150};
         double[] deadlinefactors = new double[]{1.5, 1.6, 1.7, 1.8, 1.9};
         String excelFilePath = "F:/res.xls";
         String encoding = "GBK";
@@ -54,19 +40,18 @@ public class writetoexcel {
                     String t=new String("F:/benchmark/result/" + workflowtype[1]+"_"+tasknums[i] + " [" + privacytaskpercent[j][0] + "," + privacytaskpercent[j][1] + "," + privacytaskpercent[j][2]+ "]_"+ins+".txt");
                     respath.add(t);
                     double[] deadmin=new double[]{Double.MAX_VALUE,Double.MAX_VALUE,Double.MAX_VALUE,Double.MAX_VALUE,Double.MAX_VALUE};
+
                     try {
-                        int line=1;
                         File file=new File(t);
                         InputStreamReader read = null;
                         read = new InputStreamReader(new FileInputStream(file), encoding);
                         BufferedReader bufferedReader = new BufferedReader(read);
                         String lineTxt = null;
-                        while ((lineTxt = bufferedReader.readLine()) != null&&(line<3646)){
+                        while ((lineTxt = bufferedReader.readLine()) != null){
                             String[] list =  lineTxt.split(" ");
                             int n=0;
                             double deadlinefactor=Double.parseDouble(list[10]);
                             deadmin[deadline.get(deadlinefactor)]=Math.min(deadmin[deadline.get(deadlinefactor)],Double.parseDouble(list[12]));
-                            line++;
                         }
                         for(int x=0;x<5;x++)
                         {
@@ -80,49 +65,47 @@ public class writetoexcel {
                         e.printStackTrace();
                     }
 //                }
+                }
             }
-        }
         }
         exportonefile(respath, excelFilePath, encoding);
 
     }
 
     public static void exportonefile( List<String> filePath, String excelFilePath, String encoding) {
-            //创建工作薄
-            HSSFWorkbook workbook=new HSSFWorkbook();
-            //创建sheet
-            HSSFSheet sheet=workbook.createSheet();
-            //创建第一行row
-            HSSFRow header=sheet.createRow(0);
-            //创建单元格并插入表头
-            HSSFCell cell=null;
-            String[] infos={"tasknum","percentage","SDM","TRM","LTSMLocal","LTSMUsing","NTSMLocal","NTSMUsing","deadlinefactor","instance","Fee","deadline","makespan"};
-            for(int i=0;i<infos.length;i++){
-                cell=header.createCell(i);
-                cell.setCellValue(infos[i]);
-            }
+        //创建工作薄
+        HSSFWorkbook workbook=new HSSFWorkbook();
+        //创建sheet
+        HSSFSheet sheet=workbook.createSheet();
+        //创建第一行row
+        HSSFRow header=sheet.createRow(0);
+        //创建单元格并插入表头
+        HSSFCell cell=null;
+        String[] infos={"tasknum","percentage","deadlinefactor","instance","Fee","deadline","makespan"};
+        for(int i=0;i<infos.length;i++){
+            cell=header.createCell(i);
+            cell.setCellValue(infos[i]);
+        }
 
         //
-            //一些临时变量，用于写到excel中
-            try {
-                int i = 1;
+        //一些临时变量，用于写到excel中
+        try {
+            int i = 1;
             for(String path:filePath)
             {
                 File file=new File(path);
-                int line=1;
                 InputStreamReader read = null;
                 read = new InputStreamReader(new FileInputStream(file), encoding);
                 BufferedReader bufferedReader = new BufferedReader(read);
                 String lineTxt = null;
                 HSSFRow body=null;
-                while ((lineTxt = bufferedReader.readLine()) != null&&line<3646){
+                while ((lineTxt = bufferedReader.readLine()) != null){
                     if(i==65536)
                     {
                         sheet=workbook.createSheet();
                         i=0;
                     }
                     body=sheet.createRow(i);
-                    line++;
                     String[] list =  lineTxt.split(" ");
                     int n=0;
                     double deadlinefactor=Double.parseDouble(list[10]);
@@ -143,18 +126,6 @@ public class writetoexcel {
                     cell=body.createCell(n++);
                     cell.setCellValue(per);
                     cell=body.createCell(n++);
-                    cell.setCellValue(sdm.get(list[4]));
-                    cell=body.createCell(n++);
-                    cell.setCellValue(trm.get(list[5]));
-                    cell=body.createCell(n++);
-                    cell.setCellValue(ltsm1.get(list[6]));
-                    cell=body.createCell(n++);
-                    cell.setCellValue(ltsm2.get(list[7]));
-                    cell=body.createCell(n++);
-                    cell.setCellValue(ntsm1.get(list[8]));
-                    cell=body.createCell(n++);
-                    cell.setCellValue(ntsm2.get(list[9]));
-                    cell=body.createCell(n++);
                     cell.setCellValue(deadlinefactor);
                     cell=body.createCell(n++);
                     cell.setCellValue(ins);
@@ -174,14 +145,14 @@ public class writetoexcel {
             FileOutputStream fileOutputStream=new FileOutputStream(excelFilePath);
             workbook.write(fileOutputStream);
             fileOutputStream.close();
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-                 } catch (FileNotFoundException e) {
-                e.printStackTrace();
-                } catch (IOException e) {
-                e.printStackTrace();
-            }
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+    }
 
 }
 

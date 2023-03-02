@@ -27,16 +27,11 @@ public class threadTest implements Runnable{
     public void run() {
         String prefix = "F:/benchmark/data/";
         String datapath = new String(prefix + workflowtype+" " + tasknum + " [" + privacytaskpercent[0] + "," + privacytaskpercent[1] + "," + privacytaskpercent[2] +"]"+" " + ins +".xml");
-//        Generator generator = new Generator();
-//        try {
-//            generator.execute(datapath, tasknum, privacytaskpercent, workflowtype);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-        myparser workflowParser = new myparser(datapath, new myreplicalog(),reentrantLock);
+        myparser workflowParser = new myparser(datapath, new myreplicalog());
+        reentrantLock.lock();
         workflowParser.parse();
         List<Task> list = workflowParser.getTaskList();
-
+        reentrantLock.unlock();
         Task headtask = new Task(list.get(list.size() - 1).getCloudletId() + 1, 0);
         Task tailtask = new Task(list.get(list.size() - 1).getCloudletId() + 2, 0);
         headtask.setDepth(0);

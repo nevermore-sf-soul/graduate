@@ -16,6 +16,10 @@ public class ThreadTest2 {
     double[] deadlinefactors = new double[]{1.5, 1.6, 1.7, 1.8, 1.9};
     int[] tasknums = new int[]{150,200,250,300};
     double[][] privacytaskpercent = new double[][]{{0.05, 0.15, 0.8}, {0.1, 0.2, 0.7}, {0.15, 0.25, 0.55}, {0.2, 0.3, 0.5}};
+    String[] SDM = new String[]{"SDMDepthPLSum", "SDMPathPLSum", "SDMExecutiontimePercent"};
+    String[] TRM = new String[]{"TRMMaxRankavg", "TRMMinFloatTime", "TRMTaskFeature"};
+    String[] LPLTSMLocal = new String[]{"TSMLocalMinWaste", "TSMLocalEarlyAvaiableTime", "TSMLocalEarlyFinishTime"};
+    String[] LPLTSMUsingExistingVm = new String[]{"TSMUsingExistingVmFirstAdaptSTB", "TSMUsingExistingVmLongestSTB", "TSMUsingExistingVmShortestSTB"};
     ThreadTest2(String workflowtype,Environment environment,ReentrantLock reentrantLock) {
         this.workflowtype=workflowtype;environment2=environment;this.reentrantLock=reentrantLock;
     }
@@ -65,9 +69,12 @@ public class ThreadTest2 {
                         double totaldeadline = myalg.caltaskestearlystarttime(list);
                         for (int p = 0; p < deadlinefactors.length; p++) {
                             try {
-                                myalg z = new myalg(list, "SDMPathPLSum", "TRMTaskFeature", "TSMLocalMinWaste", "TSMUsingExistingVmShortestSTB", "TSMLocalMinWaste", "TSMUsingExistingVmShortestSTB",
+                                myalg.caltaskestearlystarttime(list);
+                                myalg z = new myalg(list,
                                         totaldeadline * deadlinefactors[p], tasknums[i], privacytaskpercent[j], environment2, respath+" myalg.txt", deadlinefactors[p],ins);
+                                myalg.caltaskestearlystarttime(list);
                                 iheft IHEFT=new iheft(list,tasknums[i], respath+" iheft.txt",environment2,deadlinefactors[p],privacytaskpercent[j],totaldeadline * deadlinefactors[p],ins);
+                                myalg.caltaskestearlystarttime(list);
                                 nocloud nocloud=new nocloud(list,tasknums[i],respath+" nocloud.txt",environment2,deadlinefactors[p],privacytaskpercent[j],totaldeadline * deadlinefactors[p],ins);
                             } catch (IOException e) {
                                 e.printStackTrace();

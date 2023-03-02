@@ -448,6 +448,7 @@ public class Environment {
                     }
                 }
         }
+
         public void releaseVm(int Vmid) {
                 Datacenter datacenter=datacenterList.get(allVmList.get(Vmid).getDatacenterid());
                 datacenter.setUseablecores(datacenter.getUseablecores()+allVmList.get(Vmid).cpucore);

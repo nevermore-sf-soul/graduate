@@ -62,7 +62,7 @@ public class LNPrivacyTaskScheduling {
                         else{
                             ft2=environment.ComputeTaskFinishTime(i,vmid2);
                         }
-                        if(Integer.parseInt(strings[1])< environment.vmid)
+                        if(strings.length==2)
                         {
                             vmid3=Integer.parseInt(strings[1]);
                             ft3=environment.ComputeTaskFinishTime(i,vmid3);
@@ -81,7 +81,7 @@ public class LNPrivacyTaskScheduling {
                         }
                         else {
                             ft=ft3;
-                            if(Integer.parseInt(strings[1])< environment.vmid)
+                            if(strings.length==2)
                             {
                                 keyvmid=vmid3;
                             }
@@ -155,7 +155,7 @@ public class LNPrivacyTaskScheduling {
                             else{
                                 ft2=environment.ComputeTaskFinishTime(i,vmid2);
                             }
-                            if(Integer.parseInt(strings[1])< environment.vmid)
+                            if(strings.length==2)
                             {
                                 vmid3=Integer.parseInt(strings[1]);
                                 ft3=environment.ComputeTaskFinishTime(i,vmid3);
@@ -174,7 +174,7 @@ public class LNPrivacyTaskScheduling {
                             }
                             else {
                                 ft=ft3;
-                                if(Integer.parseInt(strings[1])< environment.vmid)
+                                if(strings.length==2)
                                 {
                                     keyvmid=vmid3;
                                 }
