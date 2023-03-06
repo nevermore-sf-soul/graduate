@@ -1,6 +1,7 @@
 package org.workflowsim;
 
 import org.workflowsim.algorithms.iheft;
+import org.workflowsim.algorithms.mcpcpp;
 import org.workflowsim.algorithms.nocloud;
 import simulation.generator.Generator;
 
@@ -75,7 +76,7 @@ public class ThreadTest2 {
                                 myalg.caltaskestearlystarttime(list);
                                 iheft IHEFT=new iheft(list,tasknums[i], respath+" iheft.txt",environment2,deadlinefactors[p],privacytaskpercent[j],totaldeadline * deadlinefactors[p],ins);
                                 myalg.caltaskestearlystarttime(list);
-                                nocloud nocloud=new nocloud(list,tasknums[i],respath+" nocloud.txt",environment2,deadlinefactors[p],privacytaskpercent[j],totaldeadline * deadlinefactors[p],ins);
+                                mcpcpp nocloud=new mcpcpp(list,tasknums[i],respath+" mcpcpp.txt",environment2,deadlinefactors[p],privacytaskpercent[j],totaldeadline * deadlinefactors[p],ins);
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }

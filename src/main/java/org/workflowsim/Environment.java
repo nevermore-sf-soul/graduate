@@ -414,7 +414,7 @@ public class Environment {
                                 {
                                         tempfile=0;
                                 }
-                                else{
+                                else if(pre.getVmId()!=-1){
                                         for(FileItem f1:i.getFileList())
                                         {
                                                 for(FileItem f2:pre.getFileList())
@@ -426,6 +426,7 @@ public class Environment {
                                                 }
                                         }
                                 }
+                                if(pre.getVmId()!=-1)
                                 processtime=Math.max(processtime,(tempfile)/bandwidth[allVmList.get(pre.getVmId()).getDatacenterid()][j.getDatacenterid()]+(i.getCloudletLength()*1.0)/(j.getCpucore()*datacenterList.get(j.getDatacenterid()).getMibps()));
                         }
                 }

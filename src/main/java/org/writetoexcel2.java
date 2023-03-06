@@ -1,10 +1,7 @@
 package org;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import jxl.write.biff.RowsExceededException;
 import org.apache.logging.log4j.LogManager;
@@ -20,8 +17,22 @@ public class writetoexcel2 {
     static Map<Integer,Integer> taskn=new HashMap<>();
     static Map<Double,Integer> deadline=new HashMap<>();
     static double[][][][] min=new double[4][4][5][10];//tasknum,privacypercent,deadlinefactor,instance
+
     static double[][] privacytaskpercent = new double[][]{{0.05, 0.15, 0.8}, {0.1, 0.2, 0.7}, {0.15, 0.25, 0.55}, {0.2, 0.3, 0.5}};
-    public static void main(String argv[]) {
+    public static void main(String[] args) {
+        for(int i=0;i<4;i++)
+        {
+            for(int j=0;j<4;j++)
+            {
+                for(int k=0;k<5;k++)
+                {
+                    for(int z=0;z<10;z++)
+                    {
+                        min[i][j][k][z]=Double.MAX_VALUE;
+                    }
+                }
+            }
+        }
         System.setProperty("log4j.configurationFile","./path_to_the_log4j2_config_file/log4j2.xml");
         Logger log = LogManager.getLogger(writetoexcel.class.getName());
         int[] tasknums = new int[]{150,200,250,300};
@@ -32,15 +43,12 @@ public class writetoexcel2 {
         List<String > respath=new ArrayList<>();
         taskn.put(150,0);taskn.put(200,1);taskn.put(250,2);taskn.put(300,3);
         deadline.put(1.5,0);deadline.put(1.6,1);deadline.put(1.7,2);deadline.put(1.8,3);deadline.put(1.9,4);
-        for (int i = 0; i < tasknums.length; i++) {
+        String[] algtype=new String[]{"iheft","myalg","mcpcpp"};
+        for (int i = 0; i < algtype.length; i++) {
 //            for(int w=0;w<workflowtype.length;w++)
 //            {
-            for (int j=0;j< privacytaskpercent.length;j++) {
-                for (int ins = 0; ins < 10; ins++) {
-                    String t=new String("F:/benchmark/result/" + workflowtype[1]+"_"+tasknums[i] + " [" + privacytaskpercent[j][0] + "," + privacytaskpercent[j][1] + "," + privacytaskpercent[j][2]+ "]_"+ins+".txt");
+                    String t=new String("F:/benchmark/result/" + workflowtype[1]+" "+algtype[i]+".txt");
                     respath.add(t);
-                    double[] deadmin=new double[]{Double.MAX_VALUE,Double.MAX_VALUE,Double.MAX_VALUE,Double.MAX_VALUE,Double.MAX_VALUE};
-
                     try {
                         File file=new File(t);
                         InputStreamReader read = null;
@@ -50,13 +58,21 @@ public class writetoexcel2 {
                         while ((lineTxt = bufferedReader.readLine()) != null){
                             String[] list =  lineTxt.split(" ");
                             int n=0;
-                            double deadlinefactor=Double.parseDouble(list[10]);
-                            deadmin[deadline.get(deadlinefactor)]=Math.min(deadmin[deadline.get(deadlinefactor)],Double.parseDouble(list[12]));
+                            double deadlinefactor=Double.parseDouble(list[4]);
+                            int tasknum=Integer.parseInt(list[0]);
+                            int ins=Integer.parseInt(list[5]);
+                            double t1=Double.parseDouble(list[1].substring(1,list[1].length()-1));double t2=Double.parseDouble(list[2].substring(0,list[2].length()-1));double t3=Double.parseDouble(list[3].substring(0,list[3].length()-1));
+                            int per=0;
+                            for(int x=0;x< privacytaskpercent.length;x++)
+                            {
+                                if(privacytaskpercent[x][0]==t1&&privacytaskpercent[x][1]==t2&&privacytaskpercent[x][2]==t3)
+                                {
+                                    per=x;break;
+                                }
+                            }
+                            min[taskn.get(tasknum)][per][deadline.get(deadlinefactor)][ins]=Math.min(min[taskn.get(tasknum)][per][deadline.get(deadlinefactor)][ins],Double.parseDouble(list[6]));
                         }
-                        for(int x=0;x<5;x++)
-                        {
-                            min[i][j][x][ins]=deadmin[x];
-                        }
+
                     } catch (UnsupportedEncodingException e) {
                         e.printStackTrace();
                     } catch (FileNotFoundException e) {
@@ -66,11 +82,8 @@ public class writetoexcel2 {
                     }
 //                }
                 }
-            }
-        }
         exportonefile(respath, excelFilePath, encoding);
-
-    }
+}
 
     public static void exportonefile( List<String> filePath, String excelFilePath, String encoding) {
         //创建工作薄
@@ -81,7 +94,7 @@ public class writetoexcel2 {
         HSSFRow header=sheet.createRow(0);
         //创建单元格并插入表头
         HSSFCell cell=null;
-        String[] infos={"tasknum","percentage","deadlinefactor","instance","Fee","deadline","makespan"};
+        String[] infos={"tasknum","percentage","deadlinefactor","instance","Fee","deadline","makespan","algtype"};
         for(int i=0;i<infos.length;i++){
             cell=header.createCell(i);
             cell.setCellValue(infos[i]);
@@ -100,17 +113,11 @@ public class writetoexcel2 {
                 String lineTxt = null;
                 HSSFRow body=null;
                 while ((lineTxt = bufferedReader.readLine()) != null){
-                    if(i==65536)
-                    {
-                        sheet=workbook.createSheet();
-                        i=0;
-                    }
-                    body=sheet.createRow(i);
                     String[] list =  lineTxt.split(" ");
                     int n=0;
-                    double deadlinefactor=Double.parseDouble(list[10]);
+                    double deadlinefactor=Double.parseDouble(list[4]);
                     int tasknum=Integer.parseInt(list[0]);
-                    int ins=Integer.parseInt(list[11]);
+                    int ins=Integer.parseInt(list[5]);
                     double t1=Double.parseDouble(list[1].substring(1,list[1].length()-1));double t2=Double.parseDouble(list[2].substring(0,list[2].length()-1));double t3=Double.parseDouble(list[3].substring(0,list[3].length()-1));
                     int per=0;
                     for(int x=0;x< privacytaskpercent.length;x++)
@@ -121,6 +128,8 @@ public class writetoexcel2 {
                         }
                     }
                     double minz=min[taskn.get(tasknum)][per][deadline.get(deadlinefactor)][ins];
+                    if(minz==0) continue;
+                    body=sheet.createRow(i);
                     cell=body.createCell(n++);
                     cell.setCellValue(tasknum);
                     cell=body.createCell(n++);
@@ -130,13 +139,16 @@ public class writetoexcel2 {
                     cell=body.createCell(n++);
                     cell.setCellValue(ins);
                     cell=body.createCell(n++);
-                    double temp=Double.parseDouble(list[12]);
-                    double res=(temp-minz)/minz*100;
+                    double temp=Double.parseDouble(list[6]);
+                    double res=(temp-minz)/minz*10;
                     cell.setCellValue(res);
                     cell=body.createCell(n++);
-                    cell.setCellValue(Double.parseDouble(list[13]));
+                    cell.setCellValue(Double.parseDouble(list[7]));
                     cell=body.createCell(n++);
-                    cell.setCellValue(Double.parseDouble(list[14]));
+                    cell.setCellValue(Double.parseDouble(list[8]));
+                    cell=body.createCell(n++);
+                    String[] spli=path.split(" ");
+                    cell.setCellValue(spli[1].substring(0,spli[1].length()-4));
                     i++;
                 }
             }

@@ -19,7 +19,7 @@ public class myalg {
             new ThreadPoolExecutor.CallerRunsPolicy());
     public static ThreadPoolExecutor threadPoolExecutor2=new ThreadPoolExecutor(15, 20,
             5, TimeUnit.SECONDS,
-            new LinkedBlockingDeque<Runnable>(160),
+            new LinkedBlockingDeque<Runnable>(),
             new ThreadPoolExecutor.CallerRunsPolicy());
     public double prefee,afterfee;
     String[] SDM = new String[]{"SDMDepthPLSum", "SDMPathPLSum", "SDMExecutiontimePercent"};
@@ -27,62 +27,59 @@ public class myalg {
     String[] LPLTSMLocal = new String[]{"TSMLocalMinWaste", "TSMLocalEarlyAvaiableTime", "TSMLocalEarlyFinishTime"};
     String[] LPLTSMUsingExistingVm = new String[]{"TSMUsingExistingVmFirstAdaptSTB", "TSMUsingExistingVmLongestSTB", "TSMUsingExistingVmShortestSTB"};
     public static void main(String[] args) throws Exception {
-        String s = "s";
         Environment environment2 = new Environment();
         environment2.edgenum = 5;
         environment2.pedgenum = 2;
         environment2.init1();
         int[] tasknums = new int[]{150,200,250,300};
-//        int[] tasknums = new int[]{150};
         double[] deadlinefactors = new double[]{1.5, 1.6, 1.7, 1.8, 1.9};
         double[][] privacytaskpercent = new double[][]{{0.05, 0.15, 0.8}, {0.1, 0.2, 0.7}, {0.15, 0.25, 0.55}, {0.2, 0.3, 0.5}};
         String[] workflowtype = new String[]{"CyberShake",  "Montage","Genome", "Inspiral", "Sipht"};
-//        String[] workflowtype = new String[]{"CyberShake", "Genome", "Inspiral", "Sipht"};
         String prefix = "F:/benchmark/data/";
-        CountDownLatch countDownLatch=new CountDownLatch(tasknums.length*privacytaskpercent.length*10);
-        for (int i = 0; i < tasknums.length; i++) {
-            for (int o = 0; o < privacytaskpercent.length; o++) {
-                for (int ins = 0; ins < 10; ins++) {
-                    String datapath = new String(prefix + workflowtype[1]+" " + tasknums[i] + " [" + privacytaskpercent[o][0] + "," + privacytaskpercent[o][1] + "," + privacytaskpercent[o][2] +  "]"+" " + ins +".xml");
-                    generatethread generatethread=new generatethread(datapath, tasknums[i], privacytaskpercent[o], workflowtype[1],countDownLatch);
-                    threadPoolExecutor1.execute(generatethread);
-                }
-            }
-        }
-        countDownLatch.await();
-        threadPoolExecutor1.shutdownNow();
-        ReentrantLock reentrantLock=new ReentrantLock();
-        for (int i = 0; i < tasknums.length; i++) {
-            for (double[] doubles : privacytaskpercent) {
-                for (int ins = 0; ins < 10; ins++) {
-                    threadTest threadTest = new threadTest(tasknums[i], ins, doubles, workflowtype[1], environment2,reentrantLock);
-                    threadPoolExecutor2.execute(threadTest);
-                }
-            }
-        }
-        threadPoolExecutor2.shutdownNow();
-
-//        CountDownLatch countDownLatch=new CountDownLatch(tasknums.length*privacytaskpercent.length*10*workflowtype.length);
+//        CountDownLatch countDownLatch=new CountDownLatch(tasknums.length*privacytaskpercent.length*10);
 //        for (int i = 0; i < tasknums.length; i++) {
-//            for(int j=0;j<workflowtype.length;j++)
-//            {
 //            for (int o = 0; o < privacytaskpercent.length; o++) {
 //                for (int ins = 0; ins < 10; ins++) {
-//                    String datapath = new String(prefix + workflowtype[j]+" " + tasknums[i] + " [" + privacytaskpercent[o][0] + "," + privacytaskpercent[o][1] + "," + privacytaskpercent[o][2] +  "]"+" " + ins +".xml");
+//                    String datapath = new String(prefix + workflowtype[1]+" " + tasknums[i] + " [" + privacytaskpercent[o][0] + "," + privacytaskpercent[o][1] + "," + privacytaskpercent[o][2] +  "]"+" " + ins +".xml");
 //                    generatethread generatethread=new generatethread(datapath, tasknums[i], privacytaskpercent[o], workflowtype[1],countDownLatch);
 //                    threadPoolExecutor1.execute(generatethread);
-//                    }
 //                }
-//        }
 //            }
+//        }
 //        countDownLatch.await();
 //        threadPoolExecutor1.shutdownNow();
 //        ReentrantLock reentrantLock=new ReentrantLock();
-//        for (String value : workflowtype) {
-//            ThreadTest2 threadTest = new ThreadTest2(value, environment2, reentrantLock);
-//            threadTest.execute();
+//        for (int i = 0; i < tasknums.length; i++) {
+//            for (double[] doubles : privacytaskpercent) {
+//                for (int ins = 0; ins < 10; ins++) {
+//                    threadTest threadTest = new threadTest(tasknums[i], ins, doubles, workflowtype[1], environment2,reentrantLock);
+//                    threadPoolExecutor2.execute(threadTest);
+//                }
+//            }
 //        }
 //        threadPoolExecutor2.shutdownNow();
+
+        CountDownLatch countDownLatch=new CountDownLatch(tasknums.length*privacytaskpercent.length*10*workflowtype.length);
+        for (int i = 0; i < tasknums.length; i++) {
+            for(int j=0;j<workflowtype.length;j++)
+            {
+            for (int o = 0; o < privacytaskpercent.length; o++) {
+                for (int ins = 0; ins < 10; ins++) {
+                    String datapath = new String(prefix + workflowtype[j]+" " + tasknums[i] + " [" + privacytaskpercent[o][0] + "," + privacytaskpercent[o][1] + "," + privacytaskpercent[o][2] +  "]"+" " + ins +".xml");
+                    generatethread generatethread=new generatethread(datapath, tasknums[i], privacytaskpercent[o], workflowtype[1],countDownLatch);
+                    threadPoolExecutor1.execute(generatethread);
+                    }
+                }
+        }
+            }
+        countDownLatch.await();
+        threadPoolExecutor1.shutdownNow();
+        ReentrantLock reentrantLock=new ReentrantLock();
+        for (String value : workflowtype) {
+            ThreadTest2 threadTest = new ThreadTest2(value, environment2, reentrantLock);
+            threadTest.execute();
+        }
+        threadPoolExecutor2.shutdownNow();
 
     }
 

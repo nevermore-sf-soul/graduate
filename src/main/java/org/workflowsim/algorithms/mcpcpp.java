@@ -30,6 +30,7 @@ public class mcpcpp {
         environment.setPtpercentage(percentage);
         environment.head = list.get(0);
         environment.tail = list.get(list.size() - 1);
+        environment.createlocalvms();
         for (Task task:environment.list)
         {
             environment.taskvaTaskid.put(task.getCloudletId(),task);
@@ -44,6 +45,7 @@ public class mcpcpp {
     }
     public void execute(String respath)
     {
+
         myalg.caltaskestearlystarttime(environment.list);
         caltaskestlatestfinTime();
         Task i=environment.head;
@@ -61,11 +63,13 @@ public class mcpcpp {
             i.setFinishtime(MaxFT);
             environment.allVmList.get(0).setEarlyidletime(MaxFT);
         environment.createlocalvms();Task tail;RentOrNewMCP rentOrNewMCP=new RentOrNewMCP();
-        while(null!=(tail=findtail(environment.tail)))
+        tail=environment.tail;
+       do
         {
             List<Task> cp=findcp(tail);
             for(int z=cp.size()-1;z>=0;z--)
             {
+                if(cp.get(z).getVmId()!=-1) continue;
                 String res=rentOrNewMCP.shcedule(cp.get(z),environment);
                 String[] strings=res.split(" ");int vmid;double ft=0;
                 if(strings[0].equals("1"))
@@ -86,25 +90,22 @@ public class mcpcpp {
                 }
                 updateTaskShcedulingInformation(cp.get(z),vmid,ft);
             }
-        }
+        }while(null!=(tail=findtail()));
         afterfee=environment.calculateprices();
     }
-    Task findtail(Task task)
+    Task findtail()
     {
-        for(Task j:task.getParentList())
-        {
-            if(j.getVmId()==-1) return  j;
-        }
-        for(Task j:task.getParentList())
-        {
-            return findtail(j);
-        }
+       for(int x=environment.list.size()-1;x>=0;x--)
+       {
+           if(environment.list.get(x).getVmId()==-1) return environment.list.get(x);
+       }
         return null;
     }
     List<Task> findcp(Task task)
     {
         Task target=null;double max=Double.MIN_VALUE;
         List<Task> res=new ArrayList<>();
+        res.add(task);
         for(Task j:task.getParentList())
         {
             if(j.getVmId()==-1&&max<j.gettaskEralyFinTime())
@@ -114,7 +115,6 @@ public class mcpcpp {
         }
         if(target!=null)
         {
-            res.add(target);
             res.addAll(findcp(target));
         }
         return res;
