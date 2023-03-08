@@ -17,7 +17,8 @@ public class RentOrNewMCP {
         double mincostRenew=Double.MAX_VALUE;
         StringBuilder sb=new StringBuilder();
         int ds=0;if(i.getPrivacy_level()==1) {
-    } else if(i.getPrivacy_level()==2) ds=1;else ds= environment.pedgenum+1;
+    } else if(i.getPrivacy_level()==2) ds=1;
+        else ds= environment.pedgenum+1;
         int vmid1=-1;double ft1,ft2=0;
 
             for(Vm vm:environment.allVmList)
