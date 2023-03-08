@@ -14,29 +14,42 @@ public class clustering {
     Environment environment;
     Map<Task, Double> rankup = new HashMap<>();
     String respath;double deadlinefactor;
-    clustering(List<Task> list, int tasknum, String respath, Environment environmentin, double deadlinefactor, double[] percentage, double deadline, int instance) throws IOException {
+    public clustering(List<Task> list, int tasknum, String respath, Environment environmentin, double[] percentage, int instance,double bandscal) throws IOException {
         this.environment = new Environment();
         environment.pedgenum = environmentin.pedgenum;
         environment.edgenum = environmentin.edgenum;
-        environment.maxbandwidth = environmentin.maxbandwidth;
+        environment.bandwidth = new double[environmentin.bandwidth.length][environmentin.bandwidth[0].length];
+        for(int x=0;x<environmentin.bandwidth.length;x++)
+        {
+            for(int y=0;y<environmentin.bandwidth[0].length;y++)
+            {
+                environment.bandwidth[x][y]=environmentin.bandwidth[x][y]*bandscal;
+            }
+        }
         environment.maxspeed = environmentin.maxspeed;
-        environment.vmprice = environmentin.vmprice;
+        environment.maxbandwidth=new double[environmentin.maxbandwidth.length][environmentin.maxbandwidth[0].length];
+        for(int x=0;x<environmentin.maxbandwidth.length;x++)
+        {
+            for(int y=0;y<environmentin.maxbandwidth[0].length;y++)
+            {
+                environment.maxbandwidth[x][y]=environmentin.maxbandwidth[x][y]*bandscal;
+            }
+        }
         environment.vmlocationvapl = environmentin.vmlocationvapl;
-        environment.bandwidth = environmentin.bandwidth;
         environment.list = new ArrayList<>();
+        environment.vmprice=environmentin.vmprice;
         environment.list.addAll(list);
         environment.vmrenthistory=new HashMap<>();
         environment.init2();
-        environment.deadline = deadline;
         environment.setTasknum(tasknum);
         environment.setPtpercentage(percentage);
         environment.head = list.get(0);
         environment.tail = list.get(list.size() - 1);
-        this.deadlinefactor=deadlinefactor;this.respath=respath;
-        execute();
+        this.respath=respath;
         environment.createlocalvms();
+        execute();
         FileWriter fw = new FileWriter(respath, true);
-        fw.write(tasknum + " " + Arrays.toString(percentage) + " " + deadlinefactor +" "+instance+ " " +deadline+" "+environment.tail.getFinishtime());
+        fw.write(tasknum + " " + Arrays.toString(percentage) + " " +instance+" "+bandscal +" "+environment.tail.getFinishtime());
         fw.write("\r\n");//换行
         fw.flush();
         fw.close();
@@ -44,8 +57,8 @@ public class clustering {
     }
     public void execute()
     {
-        int num=environment.list.size();
-        myalg.caltaskestearlystarttime(environment.list);
+        myalg.esttaskexuteTime(environment.list,environment);
+        environment.deadline=myalg.caltaskestearlystarttime(environment.list);//随便取截止期
         caltaskestlatestfinTime();
         Task i=environment.head;
         i.setVmId(0);
@@ -54,14 +67,6 @@ public class clustering {
         environment.allVmList.get(0).setEarlyidletime(0.0);
         i= environment.tail;
         i.setVmId(0);
-        double MaxFT = -1;
-        for (Task j : i.getParentList()) {
-            MaxFT = Math.max(MaxFT, j.getFinishtime());
-        }
-        i.setStarttime(MaxFT);
-        i.setFinishtime(MaxFT);
-        environment.allVmList.get(0).setEarlyidletime(MaxFT);
-        environment.createlocalvms();
         calrankavg();
         PriorityQueue<Task> priorityQueue=new PriorityQueue<>(new Comparator<Task>() {
             @Override
@@ -76,8 +81,16 @@ public class clustering {
             if(head.getVmId()!=-1) continue;
             Pair<List<Task>,Integer> p=new Pair<>(new ArrayList<>(),-1);
             findcl(head,p);
-
+            schedule(p);
         }
+        i= environment.tail;
+        double MaxFT = -1;
+        for (Task j : i.getParentList()) {
+            MaxFT = Math.max(MaxFT, j.getFinishtime());
+        }
+        i.setStarttime(MaxFT);
+        i.setFinishtime(MaxFT);
+        environment.allVmList.get(0).setEarlyidletime(MaxFT);
     }
     void calrankavg() {
         List<Task> list = environment.list;
@@ -135,11 +148,11 @@ public class clustering {
      void findcl(Task task, Pair<List<Task>,Integer> res)
     {
         res.getKey().add(task);res.setValue(Math.max(res.getValue(),task.getPrivacy_level()));
-        Task sucess=null;double rankavg=Double.MIN_VALUE;
+        Task sucess=null;
         List<Task> candinate=new ArrayList<>();
         for(Task i:task.getChildList())
         {
-            if(i.getPrivacy_level()<res.getValue()) continue;
+            if(i.getVmId()!=-1||i.getPrivacy_level()<res.getValue()) continue;
             boolean flag=true; //有没有合格的任务
             for(Task j:i.getParentList())
             {
@@ -167,6 +180,7 @@ public class clustering {
             double maxsavetime=Double.MIN_VALUE;
             for(Task i:candinate)
             {
+                if(i.getPrivacy_level()==res.getValue()) continue;
                 double savet;
                 double maxband=Double.MIN_VALUE;
                 for(int x=0;x<=environment.vmlocationvapl.get(res.getValue());x++)
@@ -207,8 +221,10 @@ public class clustering {
                 }
             }
         }
+        if(sucess!=null)
         findcl(sucess,res);
     }
+
     void caltaskestlatestfinTime() {
         List<Task> list = environment.list;
         double deadline = environment.deadline;
@@ -241,19 +257,19 @@ public class clustering {
         }
 
     }
-    public void updateTaskShcedulingInformation(Task t,int vmid,double EarlyAvaiableTime)
+    public void updateTaskShcedulingInformation(Task t,int vmid)
     {
         t.setVmId(vmid);
         t.setStarttime(Math.max(t.gettaskEarlyStartTime(),environment.allVmList.get(vmid).getEarlyidletime()));
-        t.setFinishtime(EarlyAvaiableTime);
-        if(environment.allVmList.get(vmid).getDestoryTime()<EarlyAvaiableTime)
+        double ft=environment.ComputeTaskFinishTime(t,vmid);
+        t.setFinishtime(ft);
+        environment.allVmList.get(vmid).setEarlyidletime(ft);
+        if(environment.allVmList.get(vmid).getDestoryTime()<ft)
         {
-            double exceedtime=EarlyAvaiableTime-environment.allVmList.get(vmid).getDestoryTime();
+            double exceedtime=ft-environment.allVmList.get(vmid).getDestoryTime();
             environment.allVmList.get(vmid).setDestoryTime(environment.allVmList.get(vmid).getDestoryTime()+Math.ceil(exceedtime/environment.BTU)*environment.BTU);
         }
-        environment.allVmList.get(vmid).setEarlyidletime(EarlyAvaiableTime);
         updatetaskearliestlateststartTime(t);
-
         List<TripleValue> temp=environment.vmrenthistory.getOrDefault(vmid,new ArrayList<>());
         temp.add(new TripleValue(t.getCloudletId(),t.getStarttime(),t.getFinishtime()));
         environment.vmrenthistory.put(vmid,temp);
@@ -283,7 +299,90 @@ public class clustering {
     }
     public void schedule(Pair<List<Task>,Integer> pair)
     {
+        double est=pair.getKey().get(0).gettaskEarlyStartTime();double lft=pair.getKey().get(pair.getKey().size()-1).gettaskLatestFinTime();
+        int ds=pair.getValue()==2?1:2;
+        double min=Double.MAX_VALUE;int keyvmid=0;
+        for(Vm vm:environment.allVmList)
+            {
+                if(vm.getDatacenterid()<=environment.vmlocationvapl.get(pair.getValue()))
+                {
+                if(vm.getDestoryTime()<est||vm.getDestoryTime()>est&&vm.getCreateTime()>lft) continue;
+                double ct=est;
+                for(Task i:pair.getKey())
+                {
+                    double starttime=Math.max(vm.getEarlyidletime(),ct);
+                    double processtime=environment.computeprocesstime(i,vm.getId());
+                    ct=starttime+processtime;
+                }
+                if(min>ct)
+                {
+                    min=ct;
+                    keyvmid=vm.getId();
+                }
+                }
+            }
+        int kdatacenterid=0;int kcpucore=0;
+        for(int datacenterid=ds;datacenterid<=environment.vmlocationvapl.get(pair.getValue());datacenterid++)
+        {
+            int[] cpucores=new int[]{4,2,1};
+            for(int cpucore:cpucores)
+            {
+                if(environment.datacenterList.get(datacenterid).getUseablecores()>=cpucore)
+                {
+                    double ct=est;
+                    for(Task i:pair.getKey())
+                    {
+                        double processtime=0;
+                        if(i.getParentList().size()==1&&i.getParentList().get(0).getCloudletId()==environment.head.getCloudletId())
+                        {
+                            double datasize=i.getFileList().stream().filter(item -> Parameters.FileType.INPUT==item.getType()).map(FileItem::getSize).mapToDouble(Double::doubleValue).sum();
+                            processtime=(datasize)/10+(i.getCloudletLength()*1.0)/(cpucore*environment.datacenterList.get(datacenterid).getMibps());
+                        }
+                        else{
+                            for(Task pre:i.getParentList())
+                            {
+                                double tempfile=0;
+                                for(FileItem f1:i.getFileList())
+                                {
+                                    for(FileItem f2:pre.getFileList())
+                                    {
+                                        if(f1.getName().equals(f2.getName())&&f1.getType()==Parameters.FileType.INPUT&&f2.getType()==Parameters.FileType.OUTPUT)
+                                        {
+                                            tempfile+=f1.getSize();
+                                        }
+                                    }
+                                }
+                                if(pre.getVmId()!=-1)
+                                processtime=Math.max(processtime,(tempfile)/environment.bandwidth[environment.allVmList.get(pre.getVmId()).getDatacenterid()][datacenterid]+(i.getCloudletLength()*1.0)/(cpucore*environment.datacenterList.get(datacenterid).getMibps()));
+                            }
+                        }
+                        ct+=processtime;
+                    }
+                    if(ct<min)
+                    {
+                    min=ct;
+                    keyvmid=-1;
+                    kdatacenterid=datacenterid;kcpucore=cpucore;break;
+                    }
+                }
+            }
+        }
+        if(keyvmid!=-1)
+        {
+            for(Task i:pair.getKey())
+            {
 
+                updateTaskShcedulingInformation(i,keyvmid);
+            }
+        }
+        else{
+            int id=environment.createvm(kcpucore,kdatacenterid,est,est);
+            environment.allVmList.get(id).setDestoryTime((Math.ceil((min-est)/environment.BTU))*environment.BTU+est);
+            for(Task i:pair.getKey())
+            {
+                updateTaskShcedulingInformation(i,id);
+            }
+        }
     }
     class Pair<K,V>{
        public K key;public V value;

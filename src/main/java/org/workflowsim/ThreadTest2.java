@@ -1,8 +1,6 @@
 package org.workflowsim;
 
-import org.workflowsim.algorithms.iheft;
-import org.workflowsim.algorithms.mcpcpp;
-import org.workflowsim.algorithms.nocloud;
+import org.workflowsim.algorithms.*;
 import simulation.generator.Generator;
 
 import java.io.IOException;

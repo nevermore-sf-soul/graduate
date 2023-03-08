@@ -20,11 +20,11 @@ public class RentOrNewMCP {
     } else if(i.getPrivacy_level()==2) ds=1;
         else ds= environment.pedgenum+1;
         int vmid1=-1;double ft1,ft2=0;
-
             for(Vm vm:environment.allVmList)
             {
-                if(vm.getDatacenterid()<=environment.vmlocationvapl.get(i.getPrivacy_level())&&vm.getEarlyidletime()<=i.gettaskLatestStartTime()&&vm.getCreateTime()<=i.gettaskEarlyStartTime()&&vm.getDestoryTime()>=i.gettaskEralyFinTime())
+                if(vm.getDatacenterid()<=environment.vmlocationvapl.get(i.getPrivacy_level()))
                 {
+                    if(vm.getDestoryTime()<i.gettaskEarlyStartTime()||vm.getDestoryTime()>i.gettaskEarlyStartTime()&&vm.getCreateTime()>i.gettaskLatestFinTime()) continue;
                     double RFT=vm.getDestoryTime();
                     double EAT=vm.getEarlyidletime();
                     ft1=environment.ComputeTaskFinishTime(i,vm.getId());
@@ -79,7 +79,8 @@ public class RentOrNewMCP {
                                     }
                                 }
                             }
-                            processtime=(tempfile)/environment.bandwidth[environment.allVmList.get(pre.getVmId()).getDatacenterid()][datacenterid]+(i.getCloudletLength()*1.0)/(cpucore*environment.datacenterList.get(datacenterid).getMibps());
+                            if(pre.getVmId()!=-1)
+                            processtime=Math.max(processtime,(tempfile)/environment.bandwidth[environment.allVmList.get(pre.getVmId()).getDatacenterid()][datacenterid]+(i.getCloudletLength()*1.0)/(cpucore*environment.datacenterList.get(datacenterid).getMibps()));
                         }
                     }
                     ft2=starttime+processtime;
@@ -148,7 +149,8 @@ public class RentOrNewMCP {
                                     }
                                 }
                             }
-                            processtime=(tempfile)/environment.bandwidth[environment.allVmList.get(pre.getVmId()).getDatacenterid()][datacenterid]+(i.getCloudletLength()*1.0)/(cpucore*environment.datacenterList.get(datacenterid).getMibps());
+                            if(pre.getVmId()!=-1)
+                            processtime=Math.max(processtime,(tempfile)/environment.bandwidth[environment.allVmList.get(pre.getVmId()).getDatacenterid()][datacenterid]+(i.getCloudletLength()*1.0)/(cpucore*environment.datacenterList.get(datacenterid).getMibps()));
                         }
                     }
                     double ft=starttime+processtime;

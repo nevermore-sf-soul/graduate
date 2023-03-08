@@ -53,15 +53,8 @@ public class mcpcpp {
             i.setFinishtime(0.0);
             environment.allVmList.get(0).setEarlyidletime(0.0);
         i= environment.tail;
-            i.setVmId(0);
-            double MaxFT = -1;
-            for (Task j : i.getParentList()) {
-                MaxFT = Math.max(MaxFT, j.getFinishtime());
-            }
-            i.setStarttime(MaxFT);
-            i.setFinishtime(MaxFT);
-            environment.allVmList.get(0).setEarlyidletime(MaxFT);
-        environment.createlocalvms();Task tail;RentOrNewMCP rentOrNewMCP=new RentOrNewMCP();
+        i.setVmId(0);
+        Task tail;RentOrNewMCP rentOrNewMCP=new RentOrNewMCP();
         tail=environment.tail;
        do
         {
@@ -83,6 +76,7 @@ public class mcpcpp {
                         ft=environment.ComputeTaskFinishTime(i,vmid);
                     }
                     else{
+                        ft=Double.parseDouble(strings[3]);
                         vmid=environment.createvm(Integer.parseInt(strings[1]),Integer.parseInt(strings[2]),ft,i.gettaskEarlyStartTime());
                         environment.allVmList.get(vmid).setDestoryTime((Math.ceil((ft-i.gettaskEarlyStartTime())/environment.BTU))*environment.BTU+i.gettaskEarlyStartTime());
                     }
@@ -90,6 +84,14 @@ public class mcpcpp {
                 updateTaskShcedulingInformation(cp.get(z),vmid,ft);
             }
         }while(null!=(tail=findtail()));
+        i= environment.tail;
+        double MaxFT = -1;
+        for (Task j : i.getParentList()) {
+            MaxFT = Math.max(MaxFT, j.getFinishtime());
+        }
+        i.setStarttime(MaxFT);
+        i.setFinishtime(MaxFT);
+        environment.allVmList.get(0).setEarlyidletime(MaxFT);
         afterfee=environment.calculateprices();
     }
     Task findtail()
@@ -190,4 +192,8 @@ public class mcpcpp {
             }
         }
     }
+
+    public static void main(String[] args) {
+
+        }
 }

@@ -13,30 +13,43 @@ import java.util.*;
 public class HEFT {
     Environment environment;
     Map<Task, Double> rankup = new HashMap<>();
-    String respath;double deadlinefactor;
-    HEFT(List<Task> list, int tasknum, String respath, Environment environmentin, double deadlinefactor, double[] percentage, double deadline, int instance) throws IOException {
+    String respath;
+    public HEFT(List<Task> list, int tasknum, String respath, Environment environmentin, double[] percentage, int instance,double bandscal) throws IOException {
         this.environment = new Environment();
         environment.pedgenum = environmentin.pedgenum;
         environment.edgenum = environmentin.edgenum;
-        environment.maxbandwidth = environmentin.maxbandwidth;
+        environment.bandwidth = new double[environmentin.bandwidth.length][environmentin.bandwidth[0].length];
+        for(int x=0;x<environmentin.bandwidth.length;x++)
+        {
+            for(int y=0;y<environmentin.bandwidth[0].length;y++)
+            {
+                environment.bandwidth[x][y]=environmentin.bandwidth[x][y]*bandscal;
+            }
+        }
         environment.maxspeed = environmentin.maxspeed;
+        environment.maxbandwidth=new double[environmentin.maxbandwidth.length][environmentin.maxbandwidth[0].length];
+        for(int x=0;x<environmentin.maxbandwidth.length;x++)
+        {
+            for(int y=0;y<environmentin.maxbandwidth[0].length;y++)
+            {
+                environment.maxbandwidth[x][y]=environmentin.maxbandwidth[x][y]*bandscal;
+            }
+        }
         environment.vmprice = environmentin.vmprice;
         environment.vmlocationvapl = environmentin.vmlocationvapl;
-        environment.bandwidth = environmentin.bandwidth;
         environment.list = new ArrayList<>();
         environment.list.addAll(list);
         environment.vmrenthistory=new HashMap<>();
         environment.init2();
-        environment.deadline = deadline;
         environment.setTasknum(tasknum);
         environment.setPtpercentage(percentage);
         environment.head = list.get(0);
         environment.tail = list.get(list.size() - 1);
-        this.deadlinefactor=deadlinefactor;this.respath=respath;
-        execute();
+        this.respath=respath;
         environment.createlocalvms();
+        execute();
         FileWriter fw = new FileWriter(respath, true);
-        fw.write(tasknum + " " + Arrays.toString(percentage) + " " + deadlinefactor +" "+instance+ " " +deadline+" "+environment.tail.getFinishtime());
+        fw.write(tasknum + " " + Arrays.toString(percentage) + " "+instance+" "+bandscal+" "+environment.tail.getFinishtime());
         fw.write("\r\n");//换行
         fw.flush();
         fw.close();
@@ -45,11 +58,11 @@ public class HEFT {
     HEFT(Environment environmentin)
     {
         this.environment = environmentin;
-        this.deadlinefactor=environmentin.deadline;
         execute();
     }
     public void execute()
     {
+
         int num=environment.list.size();
         while(num>0)
         {
@@ -124,8 +137,8 @@ public class HEFT {
                                                     }
                                                 }
                                             }
-                                            processtime=(tempfile)/environment.bandwidth[environment.allVmList.get(pre.getVmId()).getDatacenterid()][datacenterid]+(i.getCloudletLength()*1.0)/(cpucore*environment.datacenterList.get(datacenterid).getMibps());
-                                        }
+                                            processtime=Math.max(processtime,(tempfile)/environment.bandwidth[environment.allVmList.get(pre.getVmId()).getDatacenterid()][datacenterid]+(i.getCloudletLength()*1.0)/(cpucore*environment.datacenterList.get(datacenterid).getMibps()));
+                                    }
                                     }
                                     double ft2=starttime+processtime;
                                     if(ft2<min)
