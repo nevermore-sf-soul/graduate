@@ -8,8 +8,7 @@ import java.util.List;
 
 public class TRMMaxRankavg implements baseTRM{
     @Override
-    public void RankTasks(Environment environment) {
-        List<Task> list=environment.list;
+    public void RankTasks(Environment environment,List<Task> list) {
         list.sort(new Comparator<Task>() {
             @Override
             public int compare(Task task, Task t1) {

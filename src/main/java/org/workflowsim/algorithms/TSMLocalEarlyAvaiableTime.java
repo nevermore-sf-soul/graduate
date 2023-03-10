@@ -8,8 +8,10 @@ public class TSMLocalEarlyAvaiableTime implements baseTSMLocal {
     @Override
     public int ScheduleToLocalVms(Environment environment, Task i) {
         double MAT=Double.MAX_VALUE;Vm res=null;
-        for(Vm vm:environment.curVmList.get(0))
+        double ratio=i.getRankavg()/environment.head.getRankavg();
+        for(int j=0;j<environment.curVmList.get(0).size()*ratio;j++)
         {
+            Vm vm=environment.curVmList.get(0).get(j);
             if(MAT>vm.getEarlyidletime())
             {
                 MAT=vm.getEarlyidletime();

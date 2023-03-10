@@ -55,13 +55,6 @@ public class ThreadTest3 {
                     String respath = "F:/benchmark/result/" +workflowtype;
                     for (int p = 0; p < bandscal.length; p++) {
                         try {
-//                                myalg.caltaskestearlystarttime(list);
-//                                myalg z = new myalg(list,
-//                                        totaldeadline * deadlinefactors[p], tasknums[i], privacytaskpercent[j], environment2, respath+" myalg.txt", deadlinefactors[p],ins);
-//                                myalg.caltaskestearlystarttime(list);
-//                                iheft IHEFT=new iheft(list,tasknums[i], respath+" iheft.txt",environment2,deadlinefactors[p],privacytaskpercent[j],totaldeadline * deadlinefactors[p],ins);
-//                                myalg.caltaskestearlystarttime(list);
-//                                mcpcpp nocloud=new mcpcpp(list,tasknums[i],respath+" mcpcpp.txt",environment2,deadlinefactors[p],privacytaskpercent[j],totaldeadline * deadlinefactors[p],ins);
                             clustering clustering=new clustering(list,tasknums[i], respath+" cluster.txt",environment2,privacytaskpercent[j],ins,bandscal[p]);
                             HEFT heft=new HEFT(list,tasknums[i], respath+" heft.txt",environment2,privacytaskpercent[j],ins,bandscal[p]);
                             nocloud nocloud=new nocloud(list,tasknums[i], respath+" nocloud.txt",environment2,privacytaskpercent[j],ins,bandscal[p]);

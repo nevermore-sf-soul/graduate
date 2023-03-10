@@ -371,6 +371,12 @@ public class Environment {
                 for(int i=0;i<2;i++) {int id=createvm(1,0,0,0);allVmList.get(id).destoryTime=Double.MAX_VALUE;allVmList.get(id).createTime=0;}
                 for(int i=0;i<3;i++) {int id=createvm(2,0,0,0);allVmList.get(id).destoryTime=Double.MAX_VALUE;allVmList.get(id).createTime=0;}
         }
+        public void createlocalvms(int n)
+        {
+                int a= (int) Math.ceil(n/3.0),b=n-a;
+                for(int i=0;i<b;i++) {int id=createvm(1,0,0,0);allVmList.get(id).destoryTime=Double.MAX_VALUE;allVmList.get(id).createTime=0;}
+                for(int i=0;i<a;i++) {int id=createvm(2,0,0,0);allVmList.get(id).destoryTime=Double.MAX_VALUE;allVmList.get(id).createTime=0;}
+        }
         public void clearvmhistory()
         {
                 vmid=0;
@@ -386,7 +392,6 @@ public class Environment {
                         i.setVmId(-1);
                         i.settaskLatestStartTime(-1);
                         i.settaskLatestFinTime(-1);
-
                 }
                 allVmList=new ArrayList<>();
         }

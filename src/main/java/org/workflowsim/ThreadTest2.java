@@ -15,6 +15,7 @@ public class ThreadTest2 {
     double[] deadlinefactors = new double[]{1.5, 1.6, 1.7, 1.8, 1.9};
     int[] tasknums = new int[]{150,200,250,300};
     double[][] privacytaskpercent = new double[][]{{0.05, 0.15, 0.8}, {0.1, 0.2, 0.7}, {0.15, 0.25, 0.55}, {0.2, 0.3, 0.5}};
+    double[] localscal=new double[]{0.1,0.2,0.3,0.4};
     String[] SDM = new String[]{"SDMDepthPLSum", "SDMPathPLSum", "SDMExecutiontimePercent"};
     String[] TRM = new String[]{"TRMMaxRankavg", "TRMMinFloatTime", "TRMTaskFeature"};
     String[] LPLTSMLocal = new String[]{"TSMLocalMinWaste", "TSMLocalEarlyAvaiableTime", "TSMLocalEarlyFinishTime"};
@@ -64,19 +65,24 @@ public class ThreadTest2 {
                         /**
                          * 确定工作流合理截止期，估计任务最早开始时间、最早结束时间
                          */
+                        environment2.init2();
                         String respath = "F:/benchmark/result/" +workflowtype;
                         double totaldeadline = myalg.caltaskestearlystarttime(list);
                         for (int p = 0; p < deadlinefactors.length; p++) {
-                            try {
-                                myalg.caltaskestearlystarttime(list);
-                                myalg z = new myalg(list,
-                                        totaldeadline * deadlinefactors[p], tasknums[i], privacytaskpercent[j], environment2, respath+" myalg.txt", deadlinefactors[p],ins);
-                                myalg.caltaskestearlystarttime(list);
-                                iheft IHEFT=new iheft(list,tasknums[i], respath+" iheft.txt",environment2,deadlinefactors[p],privacytaskpercent[j],totaldeadline * deadlinefactors[p],ins);
-                                myalg.caltaskestearlystarttime(list);
-                                mcpcpp nocloud=new mcpcpp(list,tasknums[i],respath+" mcpcpp.txt",environment2,deadlinefactors[p],privacytaskpercent[j],totaldeadline * deadlinefactors[p],ins);
-                            } catch (IOException e) {
-                                e.printStackTrace();
+                            int lvms=myalg.estlocalvms(datapath,environment2,list.size()-2,reentrantLock,totaldeadline*deadlinefactors[p]);
+                            for(int los=0;los< localscal.length;los++)
+                            {
+                                try {
+                                    myalg.caltaskestearlystarttime(list);
+                                    myalg z = new myalg(list,
+                                            totaldeadline * deadlinefactors[p], tasknums[i], privacytaskpercent[j], environment2, respath+" myalg.txt", deadlinefactors[p],ins,localscal[los], (int) (lvms*localscal[los]));
+                                    myalg.caltaskestearlystarttime(list);
+                                    iheft IHEFT=new iheft(list,tasknums[i], respath+" iheft.txt",environment2,deadlinefactors[p],privacytaskpercent[j],totaldeadline * deadlinefactors[p],ins,localscal[los], (int) (lvms*localscal[los]));
+                                    myalg.caltaskestearlystarttime(list);
+                                    mcpcpp nocloud=new mcpcpp(list,tasknums[i],respath+" mcpcpp.txt",environment2,deadlinefactors[p],privacytaskpercent[j],totaldeadline * deadlinefactors[p],ins,localscal[los], (int) (lvms*localscal[los]));
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
                             }
                         }
                     }

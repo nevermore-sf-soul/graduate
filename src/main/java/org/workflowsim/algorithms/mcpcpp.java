@@ -12,7 +12,7 @@ public class mcpcpp {
     Environment environment;
     String respath;double deadlinefactor;double[] percentage;double deadline;
     public double prefee,afterfee;
-    public mcpcpp(List<Task> list, int tasknum, String respath, Environment environmentin, double deadlinefactor, double[] percentage, double deadline, int instance) throws IOException {
+    public mcpcpp(List<Task> list, int tasknum, String respath, Environment environmentin, double deadlinefactor, double[] percentage, double deadline, int instance,double localscale,int localvms) throws IOException {
         environment = new Environment();
         environment.pedgenum = environmentin.pedgenum;
         environment.edgenum = environmentin.edgenum;
@@ -30,14 +30,14 @@ public class mcpcpp {
         environment.setPtpercentage(percentage);
         environment.head = list.get(0);
         environment.tail = list.get(list.size() - 1);
-        environment.createlocalvms();
+        environment.createlocalvms(localvms);
         for (Task task:environment.list)
         {
             environment.taskvaTaskid.put(task.getCloudletId(),task);
         }
         execute(respath);
         FileWriter fw = new FileWriter(respath, true);
-        fw.write(tasknum + " " + Arrays.toString(percentage) + " " + deadlinefactor +" "+instance+" "+afterfee+" "+ deadline+" "+environment.tail.getFinishtime());
+        fw.write(tasknum + " " + Arrays.toString(percentage) + " " + deadlinefactor +" "+instance+" "+localscale+" "+afterfee+" "+ deadline+" "+environment.tail.getFinishtime());
         fw.write("\r\n");//换行
         fw.flush();
         fw.close();

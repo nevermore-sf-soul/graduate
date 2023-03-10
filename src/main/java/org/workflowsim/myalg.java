@@ -21,11 +21,12 @@ public class myalg {
             5, TimeUnit.SECONDS,
             new LinkedBlockingDeque<Runnable>(),
             new ThreadPoolExecutor.CallerRunsPolicy());
-    public double prefee,afterfee;
+    public double prefee,afterfee;public double localscale;
     String[] SDM = new String[]{"SDMDepthPLSum", "SDMPathPLSum", "SDMExecutiontimePercent"};
     String[] TRM = new String[]{"TRMMaxRankavg", "TRMMinFloatTime", "TRMTaskFeature"};
     String[] LPLTSMLocal = new String[]{"TSMLocalMinWaste", "TSMLocalEarlyAvaiableTime", "TSMLocalEarlyFinishTime"};
     String[] LPLTSMUsingExistingVm = new String[]{"TSMUsingExistingVmFirstAdaptSTB", "TSMUsingExistingVmLongestSTB", "TSMUsingExistingVmShortestSTB"};
+
     public static void main(String[] args) throws Exception {
         Environment environment2 = new Environment();
         environment2.edgenum = 5;
@@ -34,30 +35,30 @@ public class myalg {
         int[] tasknums = new int[]{150,200,250,300};
         double[] deadlinefactors = new double[]{1.5, 1.6, 1.7, 1.8, 1.9};
         double[][] privacytaskpercent = new double[][]{{0.05, 0.15, 0.8}, {0.1, 0.2, 0.7}, {0.15, 0.25, 0.55}, {0.2, 0.3, 0.5}};
+        double[] localscal=new double[]{0.1,0.2,0.3,0.4};
         String[] workflowtype = new String[]{"CyberShake",  "Montage","Genome", "Inspiral", "Sipht"};
         String prefix = "F:/benchmark/data/";
-//        CountDownLatch countDownLatch=new CountDownLatch(tasknums.length*privacytaskpercent.length*10);
-//        for (int i = 0; i < tasknums.length; i++) {
-//            for (int o = 0; o < privacytaskpercent.length; o++) {
-//                for (int ins = 0; ins < 10; ins++) {
-//                    String datapath = new String(prefix + workflowtype[1]+" " + tasknums[i] + " [" + privacytaskpercent[o][0] + "," + privacytaskpercent[o][1] + "," + privacytaskpercent[o][2] +  "]"+" " + ins +".xml");
-//                    generatethread generatethread=new generatethread(datapath, tasknums[i], privacytaskpercent[o], workflowtype[1],countDownLatch);
-//                    threadPoolExecutor1.execute(generatethread);
-//                }
-//            }
-//        }
-//        countDownLatch.await();
-//        threadPoolExecutor1.shutdownNow();
-//        ReentrantLock reentrantLock=new ReentrantLock();
-//        for (int i = 0; i < tasknums.length; i++) {
-//            for (double[] doubles : privacytaskpercent) {
-//                for (int ins = 0; ins < 10; ins++) {
-//                    threadTest threadTest = new threadTest(tasknums[i], ins, doubles, workflowtype[1], environment2,reentrantLock);
-//                    threadPoolExecutor2.execute(threadTest);
-//                }
-//            }
-//        }
-//        threadPoolExecutor2.shutdownNow();
+        CountDownLatch countDownLatch=new CountDownLatch(tasknums.length*privacytaskpercent.length*10);
+        for (int i = 0; i < tasknums.length; i++) {
+            for (int o = 0; o < privacytaskpercent.length; o++) {
+                for (int ins = 0; ins < 10; ins++) {
+                        String datapath = new String(prefix + workflowtype[1]+" " + tasknums[i] + " [" + privacytaskpercent[o][0] + "," + privacytaskpercent[o][1] + "," + privacytaskpercent[o][2] +  "]"+" "+ ins +".xml");
+                        generatethread generatethread=new generatethread(datapath, tasknums[i], privacytaskpercent[o], workflowtype[1],countDownLatch);
+                        threadPoolExecutor1.execute(generatethread);
+                }
+            }
+        }
+        countDownLatch.await();
+        threadPoolExecutor1.shutdownNow();
+        ReentrantLock reentrantLock=new ReentrantLock();
+        for (int i = 0; i < tasknums.length; i++) {
+            for (double[] doubles : privacytaskpercent) {
+                for (int ins = 0; ins < 10; ins++) {
+                    threadTest threadTest = new threadTest(tasknums[i], ins, doubles, workflowtype[1], environment2,reentrantLock);
+                    threadPoolExecutor2.execute(threadTest);
+                }
+            }
+        }
 
 //        CountDownLatch countDownLatch=new CountDownLatch(tasknums.length*privacytaskpercent.length*10*workflowtype.length);
 //        for (int i = 0; i < tasknums.length; i++) {
@@ -80,31 +81,34 @@ public class myalg {
 //            threadTest.execute();
 //        }
 //        threadPoolExecutor2.shutdownNow();
-        CountDownLatch countDownLatch=new CountDownLatch(tasknums.length*privacytaskpercent.length*10*workflowtype.length);
-        for (int i = 0; i < tasknums.length; i++) {
-            for(int j=0;j<workflowtype.length;j++)
-            {
-                for (int o = 0; o < privacytaskpercent.length; o++) {
-                    for (int ins = 0; ins < 10; ins++) {
-                        String datapath = new String(prefix + workflowtype[j]+" " + tasknums[i] + " [" + privacytaskpercent[o][0] + "," + privacytaskpercent[o][1] + "," + privacytaskpercent[o][2] +  "]"+" " + ins +".xml");
-                        generatethread generatethread=new generatethread(datapath, tasknums[i], privacytaskpercent[o], workflowtype[1],countDownLatch);
-                        threadPoolExecutor1.execute(generatethread);
-                    }
-                }
-            }
-        }
-        countDownLatch.await();
-        threadPoolExecutor1.shutdownNow();
-        ReentrantLock reentrantLock=new ReentrantLock();
-        for (String value : workflowtype) {
-            ThreadTest3 threadTest = new ThreadTest3(value, environment2, reentrantLock);
-            threadTest.execute();
-        }
-        threadPoolExecutor2.shutdownNow();
+
+
+//        CountDownLatch countDownLatch=new CountDownLatch(tasknums.length*privacytaskpercent.length*10*workflowtype.length);
+//        for (int i = 0; i < tasknums.length; i++) {
+//            for(int j=0;j<workflowtype.length;j++)
+//            {
+//                for (int o = 0; o < privacytaskpercent.length; o++) {
+//                    for (int ins = 0; ins < 10; ins++) {
+//                        String datapath = new String(prefix + workflowtype[j]+" " + tasknums[i] + " [" + privacytaskpercent[o][0] + "," + privacytaskpercent[o][1] + "," + privacytaskpercent[o][2] +  "]"+" " + ins +".xml");
+//                        generatethread generatethread=new generatethread(datapath, tasknums[i], privacytaskpercent[o], workflowtype[1],countDownLatch);
+//                        threadPoolExecutor1.execute(generatethread);
+//                    }
+//                }
+//            }
+//        }
+//        countDownLatch.await();
+//        threadPoolExecutor1.shutdownNow();
+//        ReentrantLock reentrantLock=new ReentrantLock();
+//        for (String value : workflowtype) {
+//            ThreadTest3 threadTest = new ThreadTest3(value, environment2, reentrantLock);
+//            threadTest.execute();
+//        }
+//        threadPoolExecutor2.shutdownNow();
 
     }
 
-    myalg(List<Task> list, String SDM, String TRM, String LPLTSMLocal, String LPLTSMUsingExistingVm, String NPLTSMLocal, String NPLTSMUsingExistingVm, double dealine, int tasknum, double[] ptpercentage, Environment environmentin, String ResPath, double deadlinefactor,int instance) throws IOException {
+    myalg(List<Task> list, String SDM, String TRM, String LPLTSMLocal, String LPLTSMUsingExistingVm, String NPLTSMLocal, String NPLTSMUsingExistingVm, double dealine, int tasknum, double[] ptpercentage, Environment environmentin, String ResPath, double deadlinefactor,int instance
+    ,double localscale,int localvms) throws IOException {
         environment = new Environment();
         environment.pedgenum = environmentin.pedgenum;
         environment.edgenum = environmentin.edgenum;
@@ -112,11 +116,12 @@ public class myalg {
         environment.maxspeed = environmentin.maxspeed;
         environment.vmprice = environmentin.vmprice;
         environment.vmlocationvapl = environmentin.vmlocationvapl;
+        environment.init2();
         environment.bandwidth = environmentin.bandwidth;
         environment.list = new ArrayList<>();
+        environment.createlocalvms(localvms);
         environment.list.addAll(list);
         environment.vmrenthistory=new HashMap<>();
-        environment.init2();
         environment.setSDM(SDM);
         environment.setTRM(TRM);
         environment.setLPLTSMLocal(LPLTSMLocal);
@@ -128,6 +133,7 @@ public class myalg {
         environment.setPtpercentage(ptpercentage);
         environment.head = list.get(0);
         environment.tail = list.get(list.size() - 1);
+        this.localscale=localscale;
         for (Task task:environment.list)
         {
             environment.taskvaTaskid.put(task.getCloudletId(),task);
@@ -135,13 +141,14 @@ public class myalg {
         execute(ResPath);
         FileWriter fw = new FileWriter(ResPath, true);
         fw.write(tasknum + " " + Arrays.toString(ptpercentage) + " " +SDM+" "+TRM+" "+LPLTSMLocal+" "+LPLTSMUsingExistingVm+" "+NPLTSMLocal+" "+NPLTSMUsingExistingVm+" "
-                + deadlinefactor +" "+instance+" "+afterfee+" "+ dealine+" "+environment.tail.getFinishtime());
+                + deadlinefactor +" "+instance+" "+localscale+" "+afterfee+" "+ dealine+" "+environment.tail.getFinishtime());
         fw.write("\r\n");//换行
         fw.flush();
         fw.close();
         environment.clearvmhistory();
     }
-    myalg(List<Task> list,double dealine, int tasknum, double[] ptpercentage, Environment environmentin, String ResPath, double deadlinefactor,int instance) throws IOException {
+    myalg(List<Task> list,double dealine, int tasknum, double[] ptpercentage, Environment environmentin, String ResPath, double deadlinefactor,int instance
+    ,double localscale,int localvms) throws IOException {
         environment = new Environment();
         environment.pedgenum = environmentin.pedgenum;
         environment.edgenum = environmentin.edgenum;
@@ -150,10 +157,11 @@ public class myalg {
         environment.vmprice = environmentin.vmprice;
         environment.vmlocationvapl = environmentin.vmlocationvapl;
         environment.bandwidth = environmentin.bandwidth;
+        environment.init2();
+        environment.createlocalvms(localvms);
         environment.list = new ArrayList<>();
         environment.list.addAll(list);
         environment.vmrenthistory=new HashMap<>();
-        environment.init2();
         environment.setSDM(SDM[1]);
         environment.setTRM(TRM[2]);
         environment.setLPLTSMLocal(LPLTSMLocal[0]);
@@ -172,20 +180,16 @@ public class myalg {
         execute(ResPath);
         FileWriter fw = new FileWriter(ResPath, true);
         fw.write(tasknum + " " + Arrays.toString(ptpercentage) +" "
-                + deadlinefactor +" "+instance+" "+afterfee+" "+ dealine+" "+environment.tail.getFinishtime());
+                + deadlinefactor +" "+instance+" "+localscale+" "+afterfee+" "+ dealine+" "+environment.tail.getFinishtime());
         fw.write("\r\n");//换行
         fw.flush();
         fw.close();
         environment.clearvmhistory();
     }
 
-
-
-
     void execute(String ResPath) {
         HighPrivacyTaskScheduling highPrivacyTaskScheduling = new HighPrivacyTaskScheduling(environment);
         LNPrivacyTaskScheduling lnPrivacyTaskScheduling = new LNPrivacyTaskScheduling(environment);
-        environment.createlocalvms();
         /**
          *计算任务最晚结束时间、最晚开始时间
          */
@@ -193,8 +197,7 @@ public class myalg {
         /**
          * 如果任务排序使用了任务的rank或者在子截止期划分中使用了rank，则计算rank
          */
-        if (environment.SDM.equals("SDMPathPLSum") || environment.TRM.equals("TRMMaxRankavg"))
-            calrankavg();
+        calrankavg();
         /**
          * 如果子截止期划分使用了隐私等级和，则计算
          */
@@ -234,12 +237,15 @@ public class myalg {
             }
         }
         if (baseTRM == null) throw new IllegalArgumentException("TRM method is not determined!");
-        baseTRM.RankTasks(environment);
         /**
          * 进行任务调度
          */
-        for (Task i : environment.list) {
-            environment.destoryVm(i.getDepth());
+        List<Task> temp=new ArrayList<>();
+        temp.add(environment.head);
+        while(!temp.isEmpty())
+        {
+            baseTRM.RankTasks(environment,temp);
+            Task i=temp.get(0);
             if (i.getCloudletId() == environment.head.getCloudletId()) {
                 i.setVmId(0);
                 i.setStarttime(0.0);
@@ -261,12 +267,104 @@ public class myalg {
                     lnPrivacyTaskScheduling.execute(i);
                 }
             }
+            for(Task j:i.getChildList())
+            {
+                boolean flag=true;
+                for(Task s:j.getParentList())
+                {
+                    if(s.getVmId()==-1) {
+                        flag = false;break;
+                    }
+                }
+                if(flag) temp.add(j);
+            }
+            temp.remove(0);
         }
 //        prefee=environment.calculateprices();
 //        environment.adjustSchedulingResult();
         afterfee=environment.calculateprices();
     }
-
+    public static int estlocalvms(String datapath,Environment environmentin,int tasknums,ReentrantLock reentrantLock,double deadline)
+    {
+        Environment environment = new Environment();
+        environment.pedgenum = environmentin.pedgenum;
+        environment.edgenum = environmentin.edgenum;
+        environment.maxbandwidth = environmentin.maxbandwidth;
+        environment.maxspeed = environmentin.maxspeed;
+        environment.vmprice = environmentin.vmprice;
+        environment.vmlocationvapl = environmentin.vmlocationvapl;
+        environment.bandwidth = environmentin.bandwidth;
+        environment.vmrenthistory=new HashMap<>();
+        environment.init2();
+        List<Task> list=gettasks(datapath,reentrantLock);
+        environment.list=list;
+        int l=1,r=tasknums*10;int ans=0;
+        while(l<r)
+        {
+            int mid=(l+r)/2;
+            if(check(list,environment,mid,deadline))
+            {
+                ans=mid;r=mid-1;
+            }else l=mid+1;
+        }
+        return ans;
+    }
+    public static boolean check(List<Task> list,Environment environment,int mid,double deadline)
+    {
+        environment.createlocalvms(mid);
+        myalg.caltaskestearlystarttime(list);
+        environment.head = list.get(0);
+        environment.tail = list.get(list.size() - 1);
+        int num=list.size();
+        while(num>0)
+        {
+            for(Task i: list)
+            {
+                if(i.getVmId()!=-1) continue;
+                if (i.getCloudletId() == environment.head.getCloudletId()) {
+                    i.setVmId(0);
+                    i.setStarttime(0.0);
+                    i.setFinishtime(0.0);
+                    environment.allVmList.get(0).setEarlyidletime(0.0);num--;
+                } else {
+                    boolean flag=true;
+                    for(Task task:i.getParentList())
+                    {
+                        if(task.getVmId()==-1)
+                        {
+                            flag=false;break;
+                        }
+                    }
+                    if(!flag) continue;
+                    if (i.getCloudletId() == environment.tail.getCloudletId()) {
+                        i.setVmId(0);
+                        double MaxFT = -1;
+                        for (Task j : i.getParentList()) {
+                            MaxFT = Math.max(MaxFT, j.getFinishtime());
+                        }
+                        i.setStarttime(MaxFT);
+                        i.setFinishtime(MaxFT);
+                        environment.allVmList.get(0).setEarlyidletime(MaxFT);num--;
+                    }else{
+                        double min=Double.MAX_VALUE;int keyvmid=0;
+                        for(Vm vm:environment.curVmList.get(0))
+                            {
+                                double t=environment.ComputeTaskFinishTime(i,vm.getId());
+                                if(min>t)
+                                {
+                                    min=t;keyvmid=vm.getId();
+                                }
+                            }
+                            environment.updateTaskShcedulingInformation(i,keyvmid,min);
+                        num--;
+                    }
+                }
+            }
+        }
+        boolean flag= environment.tail.getFinishtime() <= deadline;
+        environment.clearvmhistory();
+        return flag;
+    }
     public static void esttaskexuteTime(List<Task> list, Environment environment) {
         for (Task i : list) {
             if (i.getParentList().size() == 0) {
@@ -439,7 +537,38 @@ public class myalg {
         return plsum;
     }
 
-
+    public static List<Task> gettasks(String datapath,ReentrantLock reentrantLock)
+    {
+        myparser workflowParser = new myparser(datapath, new myreplicalog());
+        reentrantLock.lock();
+        workflowParser.parse();
+        reentrantLock.unlock();
+        List<Task> list = workflowParser.getTaskList();
+        Task headtask = new Task(list.get(list.size() - 1).getCloudletId() + 1, 0);
+        Task tailtask = new Task(list.get(list.size() - 1).getCloudletId() + 2, 0);
+        headtask.setDepth(0);
+        headtask.setPrivacy_level(3);
+        tailtask.setPrivacy_level(3);
+        list.sort(new Comparator<Task>() {
+            @Override
+            public int compare(Task o1, Task o2) {
+                return o1.getDepth() - o2.getDepth();
+            }
+        });
+        tailtask.setDepth(list.get(list.size() - 1).getDepth() + 1);
+        for (Task task : list) {
+            if (task.getParentList().size() == 0) {
+                headtask.addChild(task);
+                task.addParent(headtask);
+            } else if (task.getChildList().size() == 0) {
+                tailtask.addParent(task);
+                task.addChild(tailtask);
+            }
+        }
+        list.add(0, headtask);
+        list.add(tailtask);
+        return list;
+    }
 }
 
 

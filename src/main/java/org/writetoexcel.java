@@ -40,7 +40,7 @@ public class writetoexcel {
         int[] tasknums = new int[]{150,200,250,300};
 //        int[] tasknums = new int[]{150};
         double[] deadlinefactors = new double[]{1.5, 1.6, 1.7, 1.8, 1.9};
-        String excelFilePath = "F:/res.xls";
+        String excelFilePath = "F:/rescheck.xls";
         String encoding = "GBK";
         String[] workflowtype = new String[]{"CyberShake", "Montage", "Genome", "Inspiral", "Sipht"};
         List<String > respath=new ArrayList<>();
@@ -55,18 +55,16 @@ public class writetoexcel {
                     respath.add(t);
                     double[] deadmin=new double[]{Double.MAX_VALUE,Double.MAX_VALUE,Double.MAX_VALUE,Double.MAX_VALUE,Double.MAX_VALUE};
                     try {
-                        int line=1;
                         File file=new File(t);
                         InputStreamReader read = null;
                         read = new InputStreamReader(new FileInputStream(file), encoding);
                         BufferedReader bufferedReader = new BufferedReader(read);
                         String lineTxt = null;
-                        while ((lineTxt = bufferedReader.readLine()) != null&&(line<3646)){
+                        while ((lineTxt = bufferedReader.readLine()) != null){
                             String[] list =  lineTxt.split(" ");
                             int n=0;
                             double deadlinefactor=Double.parseDouble(list[10]);
                             deadmin[deadline.get(deadlinefactor)]=Math.min(deadmin[deadline.get(deadlinefactor)],Double.parseDouble(list[12]));
-                            line++;
                         }
                         for(int x=0;x<5;x++)
                         {

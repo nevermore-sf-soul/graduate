@@ -13,7 +13,7 @@ public class iheft {
     Map<Task, Double> rankup = new HashMap<>();
     String respath;double deadlinefactor;double[] percentage;double deadline;
     public double prefee,afterfee;
-    public iheft(List<Task>list,int tasknum,String respath,Environment environmentin,double deadlinefactor,double[] percentage,double deadline,int instance) throws IOException {
+    public iheft(List<Task>list,int tasknum,String respath,Environment environmentin,double deadlinefactor,double[] percentage,double deadline,int instance,double localscale,int localvms) throws IOException {
         this.environment = new Environment();
         environment.pedgenum = environmentin.pedgenum;
         environment.edgenum = environmentin.edgenum;
@@ -32,10 +32,10 @@ public class iheft {
         environment.head = list.get(0);
         environment.tail = list.get(list.size() - 1);
         this.deadlinefactor=deadlinefactor;this.respath=respath;
-        environment.createlocalvms();
+        environment.createlocalvms(localvms);
         execute(respath);
         FileWriter fw = new FileWriter(respath, true);
-        fw.write(tasknum + " " + Arrays.toString(percentage) + " " + deadlinefactor +" "+instance+ " " +afterfee+" "+ deadline+" "+environment.tail.getFinishtime());
+        fw.write(tasknum + " " + Arrays.toString(percentage) + " " + deadlinefactor +" "+instance+" "+localscale+ " " +afterfee+" "+ deadline+" "+environment.tail.getFinishtime());
         fw.write("\r\n");//换行
         fw.flush();
         fw.close();

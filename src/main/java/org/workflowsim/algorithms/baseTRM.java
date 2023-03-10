@@ -6,5 +6,5 @@ import org.workflowsim.Task;
 import java.util.List;
 
 public interface baseTRM {
-    public void RankTasks(Environment environment);
+    public void RankTasks(Environment environment,List<Task> list);
 }

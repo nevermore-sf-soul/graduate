@@ -11,13 +11,15 @@ public class TSMLocalEarlyFinishTime implements baseTSMLocal {
             int keyvmid=-1;
 //            for(int datacenterId=0;datacenterId<=environment.vmlocationvapl.get(i.getPrivacy_level());datacenterId++)
 //            {
-            for(Vm j:environment.curVmList.get(0))
-            {
-                double ft=environment.ComputeTaskFinishTime(i, j.getId());
+        double ratio=i.getRankavg()/environment.head.getRankavg();
+        for(int j=0;j<environment.curVmList.get(0).size()*ratio;j++)
+        {
+                Vm vm=environment.curVmList.get(0).get(j);
+                double ft=environment.ComputeTaskFinishTime(i, vm.getId());
                 if(min>ft)
                 {
                     min=ft;
-                    keyvmid=j.getId();
+                    keyvmid=vm.getId();
                 }
             }
 //            }
