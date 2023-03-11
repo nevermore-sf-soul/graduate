@@ -38,49 +38,48 @@ public class myalg {
         double[] localscal=new double[]{0.1,0.2,0.3,0.4};
         String[] workflowtype = new String[]{"CyberShake",  "Montage","Genome", "Inspiral", "Sipht"};
         String prefix = "F:/benchmark/data/";
-        CountDownLatch countDownLatch=new CountDownLatch(tasknums.length*privacytaskpercent.length*10);
-        for (int i = 0; i < tasknums.length; i++) {
-            for (int o = 0; o < privacytaskpercent.length; o++) {
-                for (int ins = 0; ins < 10; ins++) {
-                        String datapath = new String(prefix + workflowtype[1]+" " + tasknums[i] + " [" + privacytaskpercent[o][0] + "," + privacytaskpercent[o][1] + "," + privacytaskpercent[o][2] +  "]"+" "+ ins +".xml");
-                        generatethread generatethread=new generatethread(datapath, tasknums[i], privacytaskpercent[o], workflowtype[1],countDownLatch);
-                        threadPoolExecutor1.execute(generatethread);
-                }
-            }
-        }
-        countDownLatch.await();
-        threadPoolExecutor1.shutdownNow();
-        ReentrantLock reentrantLock=new ReentrantLock();
-        for (int i = 0; i < tasknums.length; i++) {
-            for (double[] doubles : privacytaskpercent) {
-                for (int ins = 0; ins < 10; ins++) {
-                    threadTest threadTest = new threadTest(tasknums[i], ins, doubles, workflowtype[1], environment2,reentrantLock);
-                    threadPoolExecutor2.execute(threadTest);
-                }
-            }
-        }
-
-//        CountDownLatch countDownLatch=new CountDownLatch(tasknums.length*privacytaskpercent.length*10*workflowtype.length);
+//        CountDownLatch countDownLatch=new CountDownLatch(tasknums.length*privacytaskpercent.length*10);
 //        for (int i = 0; i < tasknums.length; i++) {
-//            for(int j=0;j<workflowtype.length;j++)
-//            {
 //            for (int o = 0; o < privacytaskpercent.length; o++) {
 //                for (int ins = 0; ins < 10; ins++) {
-//                    String datapath = new String(prefix + workflowtype[j]+" " + tasknums[i] + " [" + privacytaskpercent[o][0] + "," + privacytaskpercent[o][1] + "," + privacytaskpercent[o][2] +  "]"+" " + ins +".xml");
-//                    generatethread generatethread=new generatethread(datapath, tasknums[i], privacytaskpercent[o], workflowtype[1],countDownLatch);
-//                    threadPoolExecutor1.execute(generatethread);
-//                    }
+//                        String datapath = new String(prefix + workflowtype[1]+" " + tasknums[i] + " [" + privacytaskpercent[o][0] + "," + privacytaskpercent[o][1] + "," + privacytaskpercent[o][2] +  "]"+" "+ ins +".xml");
+//                        generatethread generatethread=new generatethread(datapath, tasknums[i], privacytaskpercent[o], workflowtype[1],countDownLatch);
+//                        threadPoolExecutor1.execute(generatethread);
 //                }
-//        }
 //            }
+//        }
 //        countDownLatch.await();
 //        threadPoolExecutor1.shutdownNow();
 //        ReentrantLock reentrantLock=new ReentrantLock();
-//        for (String value : workflowtype) {
-//            ThreadTest2 threadTest = new ThreadTest2(value, environment2, reentrantLock);
-//            threadTest.execute();
+//        for (int i = 0; i < tasknums.length; i++) {
+//            for (double[] doubles : privacytaskpercent) {
+//                for (int ins = 0; ins < 10; ins++) {
+//                    threadTest threadTest = new threadTest(tasknums[i], ins, doubles, workflowtype[1], environment2,reentrantLock);
+//                    threadPoolExecutor2.execute(threadTest);
+//                }
+//            }
 //        }
-//        threadPoolExecutor2.shutdownNow();
+
+        CountDownLatch countDownLatch=new CountDownLatch(tasknums.length*privacytaskpercent.length*10*workflowtype.length);
+        for (int i = 0; i < tasknums.length; i++) {
+            for(int j=0;j<workflowtype.length;j++)
+            {
+            for (int o = 0; o < privacytaskpercent.length; o++) {
+                for (int ins = 0; ins < 10; ins++) {
+                    String datapath = new String(prefix + workflowtype[j]+" " + tasknums[i] + " [" + privacytaskpercent[o][0] + "," + privacytaskpercent[o][1] + "," + privacytaskpercent[o][2] +  "]"+" " + ins +".xml");
+                    generatethread generatethread=new generatethread(datapath, tasknums[i], privacytaskpercent[o], workflowtype[j],countDownLatch);
+                    threadPoolExecutor1.execute(generatethread);
+                    }
+                }
+        }
+            }
+        countDownLatch.await();
+        threadPoolExecutor1.shutdownNow();
+        ReentrantLock reentrantLock=new ReentrantLock();
+        for (String value : workflowtype) {
+            ThreadTest2 threadTest = new ThreadTest2(value, environment2, reentrantLock);
+            threadTest.execute();
+        }
 
 
 //        CountDownLatch countDownLatch=new CountDownLatch(tasknums.length*privacytaskpercent.length*10*workflowtype.length);
@@ -163,9 +162,9 @@ public class myalg {
         environment.list.addAll(list);
         environment.vmrenthistory=new HashMap<>();
         environment.setSDM(SDM[1]);
-        environment.setTRM(TRM[2]);
+        environment.setTRM(TRM[0]);
         environment.setLPLTSMLocal(LPLTSMLocal[0]);
-        environment.setLPLTSMUsingExistingVm(LPLTSMUsingExistingVm[2]);
+        environment.setLPLTSMUsingExistingVm(LPLTSMUsingExistingVm[1]);
         environment.setNPLTSMLocal(LPLTSMLocal[0]);
         environment.setNPLTSMUsingExistingVm(LPLTSMUsingExistingVm[2]);
         environment.deadline = dealine;
