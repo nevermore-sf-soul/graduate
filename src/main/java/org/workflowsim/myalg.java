@@ -161,6 +161,10 @@ public class myalg {
         environment.list = new ArrayList<>();
         environment.list.addAll(list);
         environment.vmrenthistory=new HashMap<>();
+        String[] SDM = new String[]{"SDMDepthPLSum", "SDMPathPLSum", "SDMExecutiontimePercent"};
+        String[] TRM = new String[]{"TRMMaxRankavg", "TRMMinFloatTime", "TRMTaskFeature"};
+        String[] LPLTSMLocal = new String[]{"TSMLocalMinWaste", "TSMLocalEarlyAvaiableTime", "TSMLocalEarlyFinishTime"};
+        String[] LPLTSMUsingExistingVm = new String[]{"TSMUsingExistingVmFirstAdaptSTB", "TSMUsingExistingVmLongestSTB", "TSMUsingExistingVmShortestSTB"};
         environment.setSDM(SDM[1]);
         environment.setTRM(TRM[0]);
         environment.setLPLTSMLocal(LPLTSMLocal[0]);

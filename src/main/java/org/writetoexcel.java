@@ -29,15 +29,15 @@ public class writetoexcel {
         System.setProperty("log4j.configurationFile","./path_to_the_log4j2_config_file/log4j2.xml");
         Logger log = LogManager.getLogger(writetoexcel.class.getName());
         String[] SDM = new String[]{"SDMDepthPLSum", "SDMPathPLSum", "SDMExecutiontimePercent"};
-        sdm.put("SDMDepthPLSum",0);sdm.put("SDMPathPLSum",1);sdm.put("SDMExecutiontimePercent",2);
+        sdm.put("SDMDepthPLSum",0);sdm.put("SDMPathPLSum",2);sdm.put("SDMExecutiontimePercent",1);
         String[] TRM = new String[]{"TRMMaxRankavg", "TRMMinFloatTime", "TRMTaskFeature"};
         trm.put("TRMMaxRankavg",0);trm.put("TRMMinFloatTime",1);trm.put("TRMTaskFeature",2);
         String[] LPLTSMLocal = new String[]{"TSMLocalMinWaste", "TSMLocalEarlyAvaiableTime", "TSMLocalEarlyFinishTime"};
-        ltsm1.put("TSMLocalMinWaste",0);ltsm1.put("TSMLocalEarlyAvaiableTime",1);ltsm1.put("TSMLocalEarlyFinishTime",2);
-        ntsm1.put("TSMLocalMinWaste",0);ntsm1.put("TSMLocalEarlyAvaiableTime",1);ntsm1.put("TSMLocalEarlyFinishTime",2);
+        ltsm1.put("TSMLocalMinWaste",2);ltsm1.put("TSMLocalEarlyAvaiableTime",0);ltsm1.put("TSMLocalEarlyFinishTime",1);
+        ntsm1.put("TSMLocalMinWaste",2);ntsm1.put("TSMLocalEarlyAvaiableTime",0);ntsm1.put("TSMLocalEarlyFinishTime",1);
         String[] LPLTSMUsingExistingVm = new String[]{"TSMUsingExistingVmFirstAdaptSTB", "TSMUsingExistingVmLongestSTB", "TSMUsingExistingVmShortestSTB"};
-        ltsm2.put("TSMUsingExistingVmFirstAdaptSTB",0);ltsm2.put("TSMUsingExistingVmLongestSTB",1);ltsm2.put("TSMUsingExistingVmShortestSTB",2);
-        ntsm2.put("TSMUsingExistingVmFirstAdaptSTB",0);ntsm2.put("TSMUsingExistingVmLongestSTB",1);ntsm2.put("TSMUsingExistingVmShortestSTB",2);
+        ltsm2.put("TSMUsingExistingVmFirstAdaptSTB",2);ltsm2.put("TSMUsingExistingVmLongestSTB",1);ltsm2.put("TSMUsingExistingVmShortestSTB",0);
+        ntsm2.put("TSMUsingExistingVmFirstAdaptSTB",2);ntsm2.put("TSMUsingExistingVmLongestSTB",1);ntsm2.put("TSMUsingExistingVmShortestSTB",0);
         int[] tasknums = new int[]{150,200,250,300};
         double[] deadlinefactors = new double[]{1.5, 1.6, 1.7, 1.8, 1.9};
         double[] localscal=new double[]{0.1,0.2,0.3,0.4};
@@ -69,7 +69,7 @@ public class writetoexcel {
 //            {
             for (int j=0;j< privacytaskpercent.length;j++) {
                 for (int ins = 0; ins < 10; ins++) {
-                    String t=new String("F:/benchmark/result/" + workflowtype[1]+"_"+tasknums[i] + " [" + privacytaskpercent[j][0] + "," + privacytaskpercent[j][1] + "," + privacytaskpercent[j][2]+ "]_ "+ins+".txt");
+                    String t=new String("F:/benchmark/result/checkres/" + workflowtype[1]+"_"+tasknums[i] + " [" + privacytaskpercent[j][0] + "," + privacytaskpercent[j][1] + "," + privacytaskpercent[j][2]+ "]_ "+ins+".txt");
                     respath.add(t);
                     try {
                         File file=new File(t);

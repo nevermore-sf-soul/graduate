@@ -290,30 +290,6 @@ public class Environment {
                 {
                      if(datacenterList.get(vm.getDatacenterid()).getPrivacylevel()!=1)
                      {
-//                             List<TripleValue> tripleValues=vmrenthistory.get(vm.getId());
-//                             tripleValues.sort(new Comparator<TripleValue>() {
-//                                     @Override
-//                                     public int compare(TripleValue tripleValue, TripleValue t1) {
-//                                             return Double.compare(tripleValue.getStartTime(), t1.getStartTime());
-//                                     }
-//                             });
-//                             double st=0;double et=0;double curfee=0;
-//                             for(TripleValue tripleValue:tripleValues){
-//                                if(tripleValue.getStartTime()>et)
-//                                {
-//                                        curfee+=(Math.ceil(et-st)/BTU*vm.getPrice());
-//                                        st=tripleValue.getStartTime();
-//                                        et=tripleValue.getStartTime()+Math.ceil((tripleValue.getFinishTime()-tripleValue.getStartTime())/BTU)*BTU;
-//                                }
-//                                else{
-//                                        if(tripleValue.getFinishTime()>et)
-//                                        {
-//                                                et=et+Math.ceil((tripleValue.getFinishTime()-et)/BTU)*BTU;
-//                                        }
-//                                }
-//                             }
-//                             curfee+=(Math.ceil(et-st)/BTU*vm.getPrice());
-//                             res+=curfee;
                              res+=Math.ceil(vm.getDestoryTime()-vm.getCreateTime())/BTU*vm.getPrice();
                      }
                 }

@@ -66,7 +66,7 @@ public class ThreadTest2 {
                          * 确定工作流合理截止期，估计任务最早开始时间、最早结束时间
                          */
                         environment2.init2();
-                        String respath = "F:/benchmark/result/" +workflowtype;
+                        String respath = "F:/benchmark/result/compare1/" +workflowtype;
                         double totaldeadline = myalg.caltaskestearlystarttime(list);
                         for (int p = 0; p < deadlinefactors.length; p++) {
                             int lvms=myalg.estlocalvms(datapath,environment2,list.size()-2,reentrantLock,totaldeadline*deadlinefactors[p]);
