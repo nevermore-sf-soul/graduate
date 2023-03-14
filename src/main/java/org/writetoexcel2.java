@@ -28,15 +28,12 @@ public class writetoexcel2 {
         double[] deadlinefactors = new double[]{1.5, 1.6, 1.7, 1.8, 1.9};
         String excelFilePath = "F:/";
         String encoding = "GBK";
-
         List<String > respath=new ArrayList<>();
         taskn.put(150,0);taskn.put(200,1);taskn.put(250,2);taskn.put(300,3);
         deadline.put(1.5,0);deadline.put(1.6,1);deadline.put(1.7,2);deadline.put(1.8,3);deadline.put(1.9,4);
         String[] algtype=new String[]{"iheft","myalg","mcpcpp"};
-
         String[] workflowtype = new String[]{"CyberShake", "Montage", "Genome", "Inspiral", "Sipht"};
         work.put("CyberShake",0);work.put("Montage",1);work.put("Genome",2);work.put("Inspiral",3);work.put("Sipht",4);
-
         localscale.put(0.1,0);localscale.put(0.2,1);localscale.put(0.3,2);localscale.put(0.4,3);
         alg.put("iheft",0);alg.put("myalg",1);alg.put("mcpcpp",2);
         for(int a=0;a<4;a++)

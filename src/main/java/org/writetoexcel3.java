@@ -16,22 +16,29 @@ import org.workflowsim.threadTest;
 public class writetoexcel3 {
     static Map<Integer,Integer> taskn=new HashMap<>();
     static Map<Double,Integer> bandscal1=new HashMap<>();
-    static double[][][][][] min=new double[4][4][4][10][5];//tasknum,privacypercent,bandscal,instance
+    static double[][][][][][] min=new double[4][4][4][10][5][4];//tasknum,privacypercent,bandscal,instance,workflowtype,localscal
     static Map<String,Integer> work=new HashMap<>();
     static double[][] privacytaskpercent = new double[][]{{0.05, 0.15, 0.8}, {0.1, 0.2, 0.7}, {0.15, 0.25, 0.55}, {0.2, 0.3, 0.5}};
+    static Map<Double,Integer> localscale=new HashMap<>();
+    static Map<String,Integer> alg=new HashMap<>();
+    static Map<Double,Integer> deadline=new HashMap<>();
     public static void main(String[] args) {
         System.setProperty("log4j.configurationFile","./path_to_the_log4j2_config_file/log4j2.xml");
         Logger log = LogManager.getLogger(writetoexcel.class.getName());
         int[] tasknums = new int[]{150,200,250,300};
         double[] bandscal=new double[]{0.1,0.2,0.3,0.4};
-        String excelFilePath = "F:/resexp2.xls";
+
+        String excelFilePath = "F:/rescheck2.xls";
         String encoding = "GBK";
-        String[] workflowtype = new String[]{"CyberShake", "Montage", "Genome", "Inspiral", "Sipht"};
+        String[] workflowtype = new String[]{ "Genome", "Sipht"};
         List<String > respath=new ArrayList<>();
         taskn.put(150,0);taskn.put(200,1);taskn.put(250,2);taskn.put(300,3);
         bandscal1.put(0.1,0);bandscal1.put(0.2,1);bandscal1.put(0.3,2);bandscal1.put(0.4,3);
-        work.put("CyberShake",0);work.put("Montage",1);work.put("Genome",2);work.put("Inspiral",3);work.put("Sipht",4);
-        String[] algtype=new String[]{"cluster","heft","nocloud"};
+        work.put("Genome",0);work.put("Sipht",1);
+        localscale.put(0.1,0);localscale.put(0.2,1);localscale.put(0.3,2);localscale.put(0.4,3);
+        String[] algtype=new String[]{"cluster"};
+        alg.put("cluster",0);
+        deadline.put(1.5,0);deadline.put(1.6,1);deadline.put(1.7,2);deadline.put(1.8,3);deadline.put(1.9,4);
         for(int a=0;a<4;a++)
         {
             for(int j=0;j<4;j++)
@@ -42,16 +49,19 @@ public class writetoexcel3 {
                     {
                         for(int w=0;w<5;w++)
                         {
-                            min[a][j][k][z][w]=Double.MAX_VALUE;
+                            for(int u=0;u<4;u++)
+                            {
+                                    min[a][j][k][z][w][u]=Double.MAX_VALUE;
+                            }
                         }
                     }
                 }
             }
         }
-        for (int i = 0; i < algtype.length; i++) {
+
             for(int w=0;w<workflowtype.length;w++)
             {
-            String t=new String("F:/benchmark/result/" + workflowtype[w]+" "+algtype[i]+".txt");
+            String t=new String("F:/benchmark/result/check2/" + workflowtype[w]+" "+algtype[0]+".txt");
             respath.add(t);
             try {
                 File file=new File(t);
@@ -65,6 +75,8 @@ public class writetoexcel3 {
                     double bansc=Double.parseDouble(list[5]);
                     int tasknum=Integer.parseInt(list[0]);
                     int ins=Integer.parseInt(list[4]);
+                    double localsc=Double.parseDouble(list[6]);
+                    double deadlinefactor=Double.parseDouble(list[7]);
                     double t1=Double.parseDouble(list[1].substring(1,list[1].length()-1));double t2=Double.parseDouble(list[2].substring(0,list[2].length()-1));double t3=Double.parseDouble(list[3].substring(0,list[3].length()-1));
                     int per=0;
                     for(int x=0;x< privacytaskpercent.length;x++)
@@ -74,7 +86,7 @@ public class writetoexcel3 {
                             per=x;break;
                         }
                     }
-                    min[taskn.get(tasknum)][per][bandscal1.get(bansc)][ins][w]=Math.min(min[taskn.get(tasknum)][per][bandscal1.get(bansc)][ins][w],Double.parseDouble(list[6]));
+                    min[taskn.get(tasknum)][per][bandscal1.get(bansc)][ins][w][localscale.get(localsc)]=Math.min(min[taskn.get(tasknum)][per][bandscal1.get(bansc)][ins][w][localscale.get(localsc)],Double.parseDouble(list[8]));
                 }
 
             } catch (UnsupportedEncodingException e) {
@@ -85,7 +97,6 @@ public class writetoexcel3 {
                 e.printStackTrace();
             }
                 }
-        }
         exportonefile(respath, excelFilePath, encoding);
     }
 
@@ -98,7 +109,7 @@ public class writetoexcel3 {
         HSSFRow header=sheet.createRow(0);
         //创建单元格并插入表头
         HSSFCell cell=null;
-        String[] infos={"tasknum","percentage","instance","bandscal","makespan","algtype","workflowtype"};
+        String[] infos={"tasknum","percentage","instance","bandscal","makespan","algtype","workflowtype","localscale","deadlinefactor"};
         for(int i=0;i<infos.length;i++){
             cell=header.createCell(i);
             cell.setCellValue(infos[i]);
@@ -124,6 +135,8 @@ public class writetoexcel3 {
                     int ins=Integer.parseInt(list[4]);
                     double t1=Double.parseDouble(list[1].substring(1,list[1].length()-1));double t2=Double.parseDouble(list[2].substring(0,list[2].length()-1));double t3=Double.parseDouble(list[3].substring(0,list[3].length()-1));
                     int per=0;
+                    double localsc=Double.parseDouble(list[6]);
+                    double deadlinefactor=Double.parseDouble(list[7]);
                     String[] p=path.split("/");
                     String[] spli=p[p.length-1].split(" ");
                     int w=work.get(spli[0]);
@@ -134,7 +147,7 @@ public class writetoexcel3 {
                             per=x;break;
                         }
                     }
-                    double minz=min[taskn.get(tasknum)][per][bandscal1.get(bansc)][ins][w];
+                    double minz=min[taskn.get(tasknum)][per][bandscal1.get(bansc)][ins][w][localscale.get(localsc)];
                     if(minz==0) continue;
                     body=sheet.createRow(i);
                     cell=body.createCell(n++);
@@ -146,13 +159,17 @@ public class writetoexcel3 {
                     cell=body.createCell(n++);
                     cell.setCellValue(bansc);
                     cell=body.createCell(n++);
-                    double temp=Double.parseDouble(list[6]);
-                    double res=(temp-minz)/minz*10;
+                    double temp=Double.parseDouble(list[8]);
+                    double res=(temp-minz)/minz*100;
                     cell.setCellValue(res);
                     cell=body.createCell(n++);
                     cell.setCellValue(spli[1].substring(0,spli[1].length()-4));
                     cell=body.createCell(n++);
                     cell.setCellValue(spli[0]);
+                    cell=body.createCell(n++);
+                    cell.setCellValue(localsc);
+                    cell=body.createCell(n++);
+                    cell.setCellValue(deadlinefactor);
                     i++;
                 }
             }

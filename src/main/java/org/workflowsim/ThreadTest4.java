@@ -8,7 +8,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class ThreadTest3 implements Runnable{
+public class ThreadTest4 implements Runnable{
     String workflowtype;
     Environment environment2;
     ReentrantLock reentrantLock;
@@ -17,7 +17,7 @@ public class ThreadTest3 implements Runnable{
     double[] bandscal=new double[]{0.1,0.2,0.3,0.4};
     double[] localscal=new double[]{0.1,0.2,0.3,0.4};
     double[] deadlinefactors = new double[]{1.5, 1.6, 1.7, 1.8, 1.9};
-    ThreadTest3(String workflowtype,Environment environment,ReentrantLock reentrantLock) {
+    ThreadTest4(String workflowtype,Environment environment,ReentrantLock reentrantLock) {
         this.workflowtype=workflowtype;environment2=environment;this.reentrantLock=reentrantLock;
     }
     public void run() {
@@ -62,22 +62,22 @@ public class ThreadTest3 implements Runnable{
                      * 确定工作流合理截止期，估计任务最早开始时间、最早结束时间
                      */
                     environment2.init2();
-                    String respath = "F:/benchmark/result/check2/" +workflowtype;
+                    String respath = "F:/benchmark/result/compare2/" +workflowtype;
                     double totaldeadline = myalg.caltaskestearlystarttime(list);
-                    for (int d = 0; d < deadlinefactors.length; d++) {
-                        int lvms=myalg.estlocalvms(datapath,environment2,list.size()-2,reentrantLock,totaldeadline*deadlinefactors[d]);
+                        int lvms=myalg.estlocalvms(datapath,environment2,list.size()-2,reentrantLock,totaldeadline*1.8);
                         lvms=lvms==0?1:lvms;
                         for(int los=0;los< localscal.length;los++)
                         {
-                        for(int p=0;p< bandscal.length;p++)
-                        {
-                        try {
-                            clustering clustering=new clustering(list,tasknums[i], respath+" cluster.txt",environment2,privacytaskpercent[j],ins,bandscal[p],localscal[los],lvms,deadlinefactors[d]);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                        }
-                    }
+                            for(int p=0;p< bandscal.length;p++)
+                            {
+                                try {
+                                    clustering clustering=new clustering(list,tasknums[i], respath+" cluster.txt",environment2,privacytaskpercent[j],ins,bandscal[p],localscal[los],lvms);
+                                    HEFT heft=new HEFT(list,tasknums[i], respath+" heft.txt",environment2,privacytaskpercent[j],ins,bandscal[p],localscal[los],lvms);
+                                    nocloud nocloud=new nocloud(list,tasknums[i], respath+" nocloud.txt",environment2,privacytaskpercent[j],ins,bandscal[p],localscal[los],lvms);
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                            }
                     }
                 }
             }

@@ -14,7 +14,8 @@ public class clustering {
     Environment environment;
     Map<Task, Double> rankup = new HashMap<>();
     String respath;double deadlinefactor;
-    public clustering(List<Task> list, int tasknum, String respath, Environment environmentin, double[] percentage, int instance,double bandscal) throws IOException {
+    public clustering(List<Task> list, int tasknum, String respath, Environment environmentin, double[] percentage, int instance,double bandscal,double localscale,int localvms
+   , double deadlinefactor) throws IOException {
         this.environment = new Environment();
         environment.pedgenum = environmentin.pedgenum;
         environment.edgenum = environmentin.edgenum;
@@ -46,10 +47,52 @@ public class clustering {
         environment.head = list.get(0);
         environment.tail = list.get(list.size() - 1);
         this.respath=respath;
-        environment.createlocalvms();
+        environment.createlocalvms(localvms);
         execute();
         FileWriter fw = new FileWriter(respath, true);
-        fw.write(tasknum + " " + Arrays.toString(percentage) + " " +instance+" "+bandscal +" "+environment.tail.getFinishtime());
+        fw.write(tasknum + " " + Arrays.toString(percentage) + " " +instance+" "+bandscal +" "+localscale+" "+deadlinefactor+" "+environment.tail.getFinishtime());
+        fw.write("\r\n");//换行
+        fw.flush();
+        fw.close();
+        environment.clearvmhistory();
+    }
+    public clustering(List<Task> list, int tasknum, String respath, Environment environmentin, double[] percentage, int instance,double bandscal,double localscale,int localvms
+            ) throws IOException {
+        this.environment = new Environment();
+        environment.pedgenum = environmentin.pedgenum;
+        environment.edgenum = environmentin.edgenum;
+        environment.bandwidth = new double[environmentin.bandwidth.length][environmentin.bandwidth[0].length];
+        for(int x=0;x<environmentin.bandwidth.length;x++)
+        {
+            for(int y=0;y<environmentin.bandwidth[0].length;y++)
+            {
+                environment.bandwidth[x][y]=environmentin.bandwidth[x][y]*bandscal;
+            }
+        }
+        environment.maxspeed = environmentin.maxspeed;
+        environment.maxbandwidth=new double[environmentin.maxbandwidth.length][environmentin.maxbandwidth[0].length];
+        for(int x=0;x<environmentin.maxbandwidth.length;x++)
+        {
+            for(int y=0;y<environmentin.maxbandwidth[0].length;y++)
+            {
+                environment.maxbandwidth[x][y]=environmentin.maxbandwidth[x][y]*bandscal;
+            }
+        }
+        environment.vmlocationvapl = environmentin.vmlocationvapl;
+        environment.list = new ArrayList<>();
+        environment.vmprice=environmentin.vmprice;
+        environment.list.addAll(list);
+        environment.vmrenthistory=new HashMap<>();
+        environment.init2();
+        environment.setTasknum(tasknum);
+        environment.setPtpercentage(percentage);
+        environment.head = list.get(0);
+        environment.tail = list.get(list.size() - 1);
+        this.respath=respath;
+        environment.createlocalvms(localvms);
+        execute();
+        FileWriter fw = new FileWriter(respath, true);
+        fw.write(tasknum + " " + Arrays.toString(percentage) + " " +instance+" "+bandscal +" "+localscale+" "+environment.tail.getFinishtime());
         fw.write("\r\n");//换行
         fw.flush();
         fw.close();
@@ -79,7 +122,7 @@ public class clustering {
         {
             Task head=priorityQueue.poll();
             if(head.getVmId()!=-1) continue;
-            Pair<List<Task>,Integer> p=new Pair<>(new ArrayList<>(),-1);
+            Pair<List<Task>,Integer> p=new Pair<>(new ArrayList<>(),4);
             findcl(head,p);
             schedule(p);
         }
@@ -147,7 +190,7 @@ public class clustering {
     }
      void findcl(Task task, Pair<List<Task>,Integer> res)
     {
-        res.getKey().add(task);res.setValue(Math.max(res.getValue(),task.getPrivacy_level()));
+        res.getKey().add(task);res.setValue(Math.min(res.getValue(),task.getPrivacy_level()));
         Task sucess=null;
         List<Task> candinate=new ArrayList<>();
         for(Task i:task.getChildList())
@@ -299,7 +342,7 @@ public class clustering {
     }
     public void schedule(Pair<List<Task>,Integer> pair)
     {
-        double est=pair.getKey().get(0).gettaskEarlyStartTime();double lft=pair.getKey().get(pair.getKey().size()-1).gettaskLatestFinTime();
+        double est=pair.getKey().get(0).gettaskEarlyStartTime();double lft=pair.getKey().get(pair.getKey().size()-1).gettaskEralyFinTime();
         int ds=pair.getValue()==2?1:2;
         double min=Double.MAX_VALUE;int keyvmid=0;
         for(Vm vm:environment.allVmList)
@@ -307,6 +350,14 @@ public class clustering {
                 if(vm.getDatacenterid()<=environment.vmlocationvapl.get(pair.getValue()))
                 {
                 if(vm.getDestoryTime()<est||vm.getDestoryTime()>est&&vm.getCreateTime()>lft) continue;
+                if(pair.getValue()!=1&&vm.getDatacenterid()==0)
+                {
+                    int x=(int)(Math.random()*100)+1;
+                    if(x<=pair.getKey().get(pair.getKey().size()-1).getRankavg()/environment.head.getRankavg()*100)
+                    {
+                        continue;
+                    }
+                }
                 double ct=est;
                 for(Task i:pair.getKey())
                 {
@@ -383,6 +434,7 @@ public class clustering {
                 updateTaskShcedulingInformation(i,id);
             }
         }
+
     }
     class Pair<K,V>{
        public K key;public V value;

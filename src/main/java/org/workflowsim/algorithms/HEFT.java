@@ -14,7 +14,8 @@ public class HEFT {
     Environment environment;
     Map<Task, Double> rankup = new HashMap<>();
     String respath;
-    public HEFT(List<Task> list, int tasknum, String respath, Environment environmentin, double[] percentage, int instance,double bandscal) throws IOException {
+    public HEFT(List<Task> list, int tasknum, String respath, Environment environmentin, double[] percentage, int instance,double bandscal,double localscale,int localvms
+    ) throws IOException {
         this.environment = new Environment();
         environment.pedgenum = environmentin.pedgenum;
         environment.edgenum = environmentin.edgenum;
@@ -46,10 +47,10 @@ public class HEFT {
         environment.head = list.get(0);
         environment.tail = list.get(list.size() - 1);
         this.respath=respath;
-        environment.createlocalvms();
+        environment.createlocalvms(localvms);
         execute();
         FileWriter fw = new FileWriter(respath, true);
-        fw.write(tasknum + " " + Arrays.toString(percentage) + " "+instance+" "+bandscal+" "+environment.tail.getFinishtime());
+        fw.write(tasknum + " " + Arrays.toString(percentage) + " "+instance+" "+bandscal+" "+localscale+" "+environment.tail.getFinishtime());
         fw.write("\r\n");//换行
         fw.flush();
         fw.close();

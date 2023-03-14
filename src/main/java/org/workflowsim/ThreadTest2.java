@@ -8,7 +8,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class ThreadTest2 {
+public class ThreadTest2 implements Runnable{
     String workflowtype;
     Environment environment2;
     ReentrantLock reentrantLock;
@@ -24,7 +24,7 @@ public class ThreadTest2 {
         this.workflowtype=workflowtype;environment2=environment;this.reentrantLock=reentrantLock;
     }
 
-    public void execute() {
+    public void run() {
         String prefix = "F:/benchmark/data/";
         for (int i = 0; i < tasknums.length; i++) {
                 for (int j=0;j< privacytaskpercent.length;j++) {
