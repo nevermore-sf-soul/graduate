@@ -50,9 +50,11 @@ public class nocloud {
         environment.tail = list.get(list.size() - 1);
         this.respath=respath;
         environment.createlocalvms(localvms);
+        long st=System.nanoTime();
         execute();
+        long et=System.nanoTime();
         FileWriter fw = new FileWriter(respath, true);
-        fw.write(tasknum + " " + Arrays.toString(percentage) + " "+instance+" "+bandscal+" "+localscale+" "+environment.tail.getFinishtime());
+        fw.write(tasknum + " " + Arrays.toString(percentage) + " "+instance+" "+bandscal+" "+localscale+" "+(et-st)+" "+environment.tail.getFinishtime());
         fw.write("\r\n");//换行
         fw.flush();
         fw.close();

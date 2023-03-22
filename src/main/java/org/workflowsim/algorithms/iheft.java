@@ -33,15 +33,17 @@ public class iheft {
         environment.tail = list.get(list.size() - 1);
         this.deadlinefactor=deadlinefactor;this.respath=respath;
         environment.createlocalvms(localvms);
-        execute(respath);
+        long st=System.nanoTime();
+        execute();
+        long et=System.nanoTime();
         FileWriter fw = new FileWriter(respath, true);
-        fw.write(tasknum + " " + Arrays.toString(percentage) + " " + deadlinefactor +" "+instance+" "+localscale+ " " +afterfee+" "+ deadline+" "+environment.tail.getFinishtime());
+        fw.write(tasknum + " " + Arrays.toString(percentage) + " " + deadlinefactor +" "+instance+" "+localscale+ " " +afterfee+" "+ deadline+" "+(et-st)+" "+environment.tail.getFinishtime());
         fw.write("\r\n");//换行
         fw.flush();
         fw.close();
         environment.clearvmhistory();
     }
-    public void execute(String respath)
+    public void execute()
     {
         calrankavg();
         environment.list.sort(new Comparator<Task>() {

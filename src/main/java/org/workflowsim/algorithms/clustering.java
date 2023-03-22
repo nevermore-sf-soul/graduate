@@ -90,9 +90,11 @@ public class clustering {
         environment.tail = list.get(list.size() - 1);
         this.respath=respath;
         environment.createlocalvms(localvms);
+        long st=System.nanoTime();
         execute();
+        long et=System.nanoTime();
         FileWriter fw = new FileWriter(respath, true);
-        fw.write(tasknum + " " + Arrays.toString(percentage) + " " +instance+" "+bandscal +" "+localscale+" "+environment.tail.getFinishtime());
+        fw.write(tasknum + " " + Arrays.toString(percentage) + " " +instance+" "+bandscal +" "+localscale+" "+(et-st)+" "+environment.tail.getFinishtime());
         fw.write("\r\n");//换行
         fw.flush();
         fw.close();
@@ -253,6 +255,10 @@ public class clustering {
                     sucess=i;
                 }
                 }
+            if(maxsavetime<0)
+            {
+                sucess=null;
+            }
         }else{
             double maxrank=Double.MIN_VALUE;
             for(Task i:candinate)

@@ -26,7 +26,7 @@ public class myalg {
     String[] TRM = new String[]{"TRMMaxRankavg", "TRMMinFloatTime", "TRMTaskFeature"};
     String[] LPLTSMLocal = new String[]{"TSMLocalMinWaste", "TSMLocalEarlyAvaiableTime", "TSMLocalEarlyFinishTime"};
     String[] LPLTSMUsingExistingVm = new String[]{"TSMUsingExistingVmFirstAdaptSTB", "TSMUsingExistingVmLongestSTB", "TSMUsingExistingVmShortestSTB"};
-
+    public static String[] workflowtype = new String[]{"Genome","Sipht"};
     public static void main(String[] args) throws Exception {
         Environment environment2 = new Environment();
         environment2.edgenum = 5;
@@ -36,8 +36,6 @@ public class myalg {
         double[] deadlinefactors = new double[]{1.5, 1.6, 1.7, 1.8, 1.9};
         double[][] privacytaskpercent = new double[][]{{0.05, 0.15, 0.8}, {0.1, 0.2, 0.7}, {0.15, 0.25, 0.55}, {0.2, 0.3, 0.5}};
         double[] localscal=new double[]{0.1,0.2,0.3,0.4};
-        String[] workflowtype = new String[]{"Genome", "Sipht"};
-
         String prefix = "F:/benchmark/data/";
 //        CountDownLatch countDownLatch=new CountDownLatch(tasknums.length*privacytaskpercent.length*10);
 //        for (int i = 0; i < tasknums.length; i++) {
@@ -61,26 +59,26 @@ public class myalg {
 //            }
 //        }
 
-//        CountDownLatch countDownLatch=new CountDownLatch(tasknums.length*privacytaskpercent.length*10*workflowtype.length);
-//        for (int i = 0; i < tasknums.length; i++) {
-//            for(int j=0;j<workflowtype.length;j++)
-//            {
-//            for (int o = 0; o < privacytaskpercent.length; o++) {
-//                for (int ins = 0; ins < 10; ins++) {
-//                    String datapath = new String(prefix + workflowtype[j]+" " + tasknums[i] + " [" + privacytaskpercent[o][0] + "," + privacytaskpercent[o][1] + "," + privacytaskpercent[o][2] +  "]"+" " + ins +".xml");
-//                    generatethread generatethread=new generatethread(datapath, tasknums[i], privacytaskpercent[o], workflowtype[j],countDownLatch);
-//                    threadPoolExecutor1.execute(generatethread);
-//                    }
-//                }
-//        }
-//            }
-//        countDownLatch.await();
-//        threadPoolExecutor1.shutdownNow();
-//        ReentrantLock reentrantLock=new ReentrantLock();
-//        for (String value : workflowtype) {
-//            ThreadTest2 threadTest = new ThreadTest2(value, environment2, reentrantLock);
-//        threadPoolExecutor2.execute(threadTest);
-//        }
+        CountDownLatch countDownLatch=new CountDownLatch(tasknums.length*privacytaskpercent.length*10*workflowtype.length);
+        for (int i = 0; i < tasknums.length; i++) {
+            for(int j=0;j<workflowtype.length;j++)
+            {
+            for (int o = 0; o < privacytaskpercent.length; o++) {
+                for (int ins = 0; ins < 10; ins++) {
+                    String datapath = new String(prefix + workflowtype[j]+" " + tasknums[i] + " [" + privacytaskpercent[o][0] + "," + privacytaskpercent[o][1] + "," + privacytaskpercent[o][2] +  "]"+" " + ins +".xml");
+                    generatethread generatethread=new generatethread(datapath, tasknums[i], privacytaskpercent[o], workflowtype[j],countDownLatch);
+                    threadPoolExecutor1.execute(generatethread);
+                    }
+                }
+        }
+            }
+        countDownLatch.await();
+        threadPoolExecutor1.shutdownNow();
+        ReentrantLock reentrantLock=new ReentrantLock();
+        for (String value : workflowtype) {
+            ThreadTest2 threadTest = new ThreadTest2(value, environment2, reentrantLock);
+        threadPoolExecutor2.execute(threadTest);
+        }
 
 
 //        CountDownLatch countDownLatch=new CountDownLatch(tasknums.length*privacytaskpercent.length*10*workflowtype.length);
@@ -103,26 +101,26 @@ public class myalg {
 //            ThreadTest3 threadTest = new ThreadTest3(value, environment2, reentrantLock);
 //            threadPoolExecutor2.execute(threadTest);
 //        }
-        CountDownLatch countDownLatch=new CountDownLatch(tasknums.length*privacytaskpercent.length*10*workflowtype.length);
-        for (int i = 0; i < tasknums.length; i++) {
-            for(int j=0;j<workflowtype.length;j++)
-            {
-                for (int o = 0; o < privacytaskpercent.length; o++) {
-                    for (int ins = 0; ins < 10; ins++) {
-                        String datapath = new String(prefix + workflowtype[j]+" " + tasknums[i] + " [" + privacytaskpercent[o][0] + "," + privacytaskpercent[o][1] + "," + privacytaskpercent[o][2] +  "]"+" " + ins +".xml");
-                        generatethread generatethread=new generatethread(datapath, tasknums[i], privacytaskpercent[o], workflowtype[j],countDownLatch);
-                        threadPoolExecutor1.execute(generatethread);
-                    }
-                }
-            }
-        }
-        countDownLatch.await();
-        threadPoolExecutor1.shutdownNow();
-        ReentrantLock reentrantLock=new ReentrantLock();
-        for (String value : workflowtype) {
-            ThreadTest4 threadTest = new ThreadTest4(value, environment2, reentrantLock);
-            threadPoolExecutor2.execute(threadTest);
-        }
+//        CountDownLatch countDownLatch=new CountDownLatch(tasknums.length*privacytaskpercent.length*10*workflowtype.length);
+//        for (int i = 0; i < tasknums.length; i++) {
+//            for(int j=0;j<workflowtype.length;j++)
+//            {
+//                for (int o = 0; o < privacytaskpercent.length; o++) {
+//                    for (int ins = 0; ins < 10; ins++) {
+//                        String datapath = new String(prefix + workflowtype[j]+" " + tasknums[i] + " [" + privacytaskpercent[o][0] + "," + privacytaskpercent[o][1] + "," + privacytaskpercent[o][2] +  "]"+" " + ins +".xml");
+//                        generatethread generatethread=new generatethread(datapath, tasknums[i], privacytaskpercent[o], workflowtype[j],countDownLatch);
+//                        threadPoolExecutor1.execute(generatethread);
+//                    }
+//                }
+//            }
+//        }
+//        countDownLatch.await();
+//        threadPoolExecutor1.shutdownNow();
+//        ReentrantLock reentrantLock=new ReentrantLock();
+//        for (String value : workflowtype) {
+//            ThreadTest4 threadTest = new ThreadTest4(value, environment2, reentrantLock);
+//            threadPoolExecutor2.execute(threadTest);
+//        }
     }
 
     myalg(List<Task> list, String SDM, String TRM, String LPLTSMLocal, String LPLTSMUsingExistingVm, String NPLTSMLocal, String NPLTSMUsingExistingVm, double dealine, int tasknum, double[] ptpercentage, Environment environmentin, String ResPath, double deadlinefactor,int instance
@@ -156,7 +154,7 @@ public class myalg {
         {
             environment.taskvaTaskid.put(task.getCloudletId(),task);
         }
-        execute(ResPath);
+        execute();
         FileWriter fw = new FileWriter(ResPath, true);
         fw.write(tasknum + " " + Arrays.toString(ptpercentage) + " " +SDM+" "+TRM+" "+LPLTSMLocal+" "+LPLTSMUsingExistingVm+" "+NPLTSMLocal+" "+NPLTSMUsingExistingVm+" "
                 + deadlinefactor +" "+instance+" "+localscale+" "+afterfee+" "+ dealine+" "+environment.tail.getFinishtime());
@@ -199,17 +197,19 @@ public class myalg {
         {
             environment.taskvaTaskid.put(task.getCloudletId(),task);
         }
-        execute(ResPath);
+        long st=System.nanoTime();
+        execute();
+        long et=System.nanoTime();
         FileWriter fw = new FileWriter(ResPath, true);
         fw.write(tasknum + " " + Arrays.toString(ptpercentage) +" "
-                + deadlinefactor +" "+instance+" "+localscale+" "+afterfee+" "+ dealine+" "+environment.tail.getFinishtime());
+                + deadlinefactor +" "+instance+" "+localscale+" "+afterfee+" "+ dealine+" "+(et-st)+" "+environment.tail.getFinishtime());
         fw.write("\r\n");//换行
         fw.flush();
         fw.close();
         environment.clearvmhistory();
     }
 
-    void execute(String ResPath) {
+    void execute() {
         HighPrivacyTaskScheduling highPrivacyTaskScheduling = new HighPrivacyTaskScheduling(environment);
         LNPrivacyTaskScheduling lnPrivacyTaskScheduling = new LNPrivacyTaskScheduling(environment);
         /**
